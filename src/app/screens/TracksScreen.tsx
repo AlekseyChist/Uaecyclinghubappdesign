@@ -7,6 +7,7 @@ import { EmptyState } from '@/app/components/design-system/EmptyState';
 import { Chip } from '@/app/components/design-system/Chip';
 import { MapIcon } from 'lucide-react';
 import { MapView } from '@/app/components/map/MapView';
+import { trackRoutes } from '@/data/routeData';
 
 interface TracksScreenProps {
   tracks: Track[];
@@ -154,9 +155,11 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
                 region: track.region,
                 difficulty: track.difficulty,
                 coordinates: track.coordinates!,
+                route: trackRoutes[track.id], // Add route data
               }))}
             selectedTrackId={selectedTrackId}
             onTrackSelect={handlePinClick}
+            showRoutes={true}
           />
         </div>
 

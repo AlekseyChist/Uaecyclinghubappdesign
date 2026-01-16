@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -9,6 +9,7 @@ export interface MapTrack {
   region: string;
   difficulty: 'easy' | 'medium' | 'hard';
   coordinates: { lat: number; lng: number };
+  route?: [number, number][]; // Array of [lat, lng] points for the route line
 }
 
 interface MapViewProps {
@@ -17,17 +18,19 @@ interface MapViewProps {
   onTrackSelect?: (trackId: string) => void;
   center?: [number, number];
   zoom?: number;
+  showRoutes?: boolean;
 }
+
+// Colors by difficulty
+const difficultyColors = {
+  easy: '#10b981',
+  medium: '#f59e0b',
+  hard: '#ef4444',
+};
 
 // Custom marker icons by difficulty
 const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: boolean) => {
-  const colors = {
-    easy: '#10b981',
-    medium: '#f59e0b',
-    hard: '#ef4444',
-  };
-
-  const color = colors[difficulty];
+  const color = difficultyColors[difficulty];
   const size = isSelected ? 40 : 32;
   const borderWidth = isSelected ? 4 : 2;
 
@@ -48,7 +51,7 @@ const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: bo
         cursor: pointer;
       ">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
         </svg>
       </div>
     `,
@@ -58,11 +61,15 @@ const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: bo
   });
 };
 
-// Component to handle map center changes
-function MapController({ center, selectedTrackId, tracks }: {
-  center?: [number, number];
+// Component to handle map interactions
+function MapController({
+  selectedTrackId,
+  tracks,
+  showRoutes
+}: {
   selectedTrackId?: string | null;
   tracks: MapTrack[];
+  showRoutes?: boolean;
 }) {
   const map = useMap();
 
@@ -70,12 +77,18 @@ function MapController({ center, selectedTrackId, tracks }: {
     if (selectedTrackId) {
       const track = tracks.find(t => t.id === selectedTrackId);
       if (track) {
-        map.flyTo([track.coordinates.lat, track.coordinates.lng], 12, {
-          duration: 0.5,
-        });
+        // If track has a route, fit bounds to the route
+        if (showRoutes && track.route && track.route.length > 0) {
+          const bounds = L.latLngBounds(track.route.map(p => [p[0], p[1]] as [number, number]));
+          map.fitBounds(bounds, { padding: [50, 50], duration: 0.5 });
+        } else {
+          map.flyTo([track.coordinates.lat, track.coordinates.lng], 12, {
+            duration: 0.5,
+          });
+        }
       }
     }
-  }, [selectedTrackId, tracks, map]);
+  }, [selectedTrackId, tracks, map, showRoutes]);
 
   return null;
 }
@@ -85,7 +98,8 @@ export function MapView({
   selectedTrackId,
   onTrackSelect,
   center = [24.4539, 54.3773], // UAE center (Abu Dhabi)
-  zoom = 7
+  zoom = 7,
+  showRoutes = true
 }: MapViewProps) {
   return (
     <MapContainer
@@ -99,8 +113,33 @@ export function MapView({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <MapController center={center} selectedTrackId={selectedTrackId} tracks={tracks} />
+      <MapController
+        selectedTrackId={selectedTrackId}
+        tracks={tracks}
+        showRoutes={showRoutes}
+      />
 
+      {/* Render route polylines */}
+      {showRoutes && tracks.map((track) => (
+        track.route && track.route.length > 0 && (
+          <Polyline
+            key={`route-${track.id}`}
+            positions={track.route}
+            pathOptions={{
+              color: difficultyColors[track.difficulty],
+              weight: selectedTrackId === track.id ? 5 : 3,
+              opacity: selectedTrackId === track.id ? 1 : 0.7,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+            eventHandlers={{
+              click: () => onTrackSelect?.(track.id),
+            }}
+          />
+        )
+      ))}
+
+      {/* Render markers */}
       {tracks.map((track) => (
         <Marker
           key={track.id}
