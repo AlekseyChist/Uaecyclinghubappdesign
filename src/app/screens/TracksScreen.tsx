@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { BottomSheet, BottomSheetState } from '@/app/components/design-system/BottomSheet';
 import { TrackCard, Track } from '@/app/components/cards/TrackCard';
-import { MapPin } from '@/app/components/design-system/MapPin';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
 import { Chip } from '@/app/components/design-system/Chip';
 import { MapIcon } from 'lucide-react';
+import { MapView } from '@/app/components/map/MapView';
 
 interface TracksScreenProps {
   tracks: Track[];
@@ -143,29 +143,21 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           )}
         </div>
 
-        {/* Map with Pins */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-full h-full max-w-2xl p-8">
-            {/* Simulated Map Pins */}
-            <div className="relative w-full h-full">
-              {filteredTracks.slice(0, 6).map((track, index) => (
-                <div
-                  key={track.id}
-                  className="absolute"
-                  style={{
-                    left: `${20 + (index % 3) * 30}%`,
-                    top: `${20 + Math.floor(index / 3) * 35}%`,
-                  }}
-                >
-                  <MapPin
-                    difficulty={track.difficulty}
-                    selected={selectedTrackId === track.id}
-                    onClick={() => handlePinClick(track.id)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Real Map with Leaflet */}
+        <div className="absolute inset-0">
+          <MapView
+            tracks={filteredTracks
+              .filter(track => track.coordinates)
+              .map(track => ({
+                id: track.id,
+                name: track.name,
+                region: track.region,
+                difficulty: track.difficulty,
+                coordinates: track.coordinates!,
+              }))}
+            selectedTrackId={selectedTrackId}
+            onTrackSelect={handlePinClick}
+          />
         </div>
 
         {/* Track count overlay */}
