@@ -56,7 +56,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   ].filter(Boolean).length;
 
   return (
-    <div className="h-full bg-white relative">
+    <div className="h-full bg-white relative overflow-hidden">
       {/* Search and Filter Bar - moved outside map, higher z-index */}
       <div className="absolute top-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
           <div className="flex gap-2">
@@ -142,8 +142,8 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           )}
         </div>
 
-      {/* Map Area */}
-      <div className="absolute inset-0 z-0">
+      {/* Map Area - isolate creates new stacking context to contain Leaflet z-indexes */}
+      <div className="absolute inset-0 z-0 isolate overflow-hidden">
         <MapView
           tracks={filteredTracks
             .filter(track => track.coordinates)
