@@ -57,8 +57,8 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
 
   return (
     <div className="h-full bg-white relative overflow-hidden">
-      {/* Search and Filter Bar - moved outside map, higher z-index */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      {/* Search and Filter Bar - must be above map */}
+      <div className="absolute top-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 search-bar-container">
           <div className="flex gap-2">
             <SearchField
               value={searchQuery}
@@ -142,8 +142,8 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           )}
         </div>
 
-      {/* Map Area - isolate creates new stacking context to contain Leaflet z-indexes */}
-      <div className="absolute inset-0 z-0 isolate overflow-hidden">
+      {/* Map Area - map-container-wrapper class creates isolated stacking context */}
+      <div className="absolute inset-0 overflow-hidden map-container-wrapper">
         <MapView
           tracks={filteredTracks
             .filter(track => track.coordinates)
@@ -163,7 +163,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
       </div>
 
       {/* Track count overlay */}
-      <div className="absolute bottom-32 left-4 right-4 z-20 pointer-events-none">
+      <div className="absolute bottom-32 left-4 right-4 pointer-events-none track-count-overlay">
         <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 inline-flex items-center gap-2 shadow-sm">
           <MapIcon className="w-4 h-4 text-gray-500" />
           <span className="text-sm font-medium">

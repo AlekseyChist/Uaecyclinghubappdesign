@@ -83,7 +83,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
   return (
     <div
       ref={sheetRef}
-      className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out z-40"
+      className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out bottom-sheet-container"
       style={{
         height: isDragging ? `${currentHeight}px` : stateHeights[currentState],
       }}

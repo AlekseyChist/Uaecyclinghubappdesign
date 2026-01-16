@@ -52,7 +52,17 @@ button,
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Fix Leaflet map z-index to prevent overlay on BottomSheet and other UI elements */
+/* Fix Leaflet map z-index - CRITICAL: contain all map elements within their container */
+/* The map wrapper creates an isolated stacking context */
+.map-container-wrapper {
+  position: absolute !important;
+  z-index: 0 !important;
+  isolation: isolate !important;
+  transform: translateZ(0) !important;
+}
+
+/* Reset Leaflet's default high z-index values to low values */
+/* Leaflet default z-indexes are: tile=200, overlay=400, shadow=500, marker=600, tooltip=650, popup=700 */
 .leaflet-container {
   z-index: 0 !important;
 }
@@ -61,32 +71,70 @@ button,
   z-index: 0 !important;
 }
 
-.leaflet-tile-pane {
+.leaflet-map-pane {
   z-index: 0 !important;
 }
 
-.leaflet-overlay-pane {
+.leaflet-tile-pane {
   z-index: 1 !important;
 }
 
-.leaflet-marker-pane {
+.leaflet-overlay-pane {
   z-index: 2 !important;
 }
 
-.leaflet-tooltip-pane {
+.leaflet-shadow-pane {
   z-index: 3 !important;
 }
 
-.leaflet-popup-pane {
+.leaflet-marker-pane {
   z-index: 4 !important;
 }
 
-.leaflet-top,
-.leaflet-bottom {
+.leaflet-tooltip-pane {
   z-index: 5 !important;
 }
 
-/* Ensure map controls don't overlap with BottomSheet */
-.leaflet-control-container {
-  z-index: 5 !important;
+.leaflet-popup-pane {
+  z-index: 6 !important;
+}
+
+/* Control elements - keep them visible but within the map container */
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-left,
+.leaflet-right,
+.leaflet-control-container,
+.leaflet-control,
+.leaflet-control-attribution {
+  z-index: 10 !important;
+}
+
+/* CRITICAL: UI elements above the map need their own stacking context */
+/* Force BottomSheet to create new stacking context and be above map */
+.bottom-sheet-container {
+  position: fixed !important;
+  z-index: 1000 !important;
+  transform: translateZ(0) !important;
+}
+
+/* Force BottomNav to be above everything */
+.bottom-nav-container {
+  position: fixed !important;
+  z-index: 1001 !important;
+  transform: translateZ(0) !important;
+}
+
+/* Search bar container - must be above map */
+.search-bar-container {
+  position: absolute !important;
+  z-index: 1002 !important;
+  transform: translateZ(0) !important;
+}
+
+/* Track count overlay */
+.track-count-overlay {
+  position: absolute !important;
+  z-index: 999 !important;
+  transform: translateZ(0) !important;
 }
