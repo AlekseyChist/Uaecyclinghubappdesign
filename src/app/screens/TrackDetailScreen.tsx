@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Heart, Share2, Download, Navigation, MapPin, Clock, TrendingUp, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { Chip } from '@/app/components/design-system/Chip';
 import type { TrackDetail } from '@/data/mockData';
+import { gpxRoutes, gpxToTrackMapping } from '@/data/gpxRouteData';
 
 interface TrackDetailScreenProps {
   track: TrackDetail;
@@ -19,6 +20,22 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         text: `Check out ${track.name} - ${track.distance}km cycling track in ${track.region}`,
         url: window.location.href,
       });
+    }
+  };
+
+  // Find GPX file for this track
+  const gpxKey = Object.entries(gpxToTrackMapping).find(([_, id]) => id === track.id)?.[0];
+  const gpxData = gpxKey ? gpxRoutes[gpxKey] : null;
+
+  const handleDownloadGpx = () => {
+    if (gpxData) {
+      // Download from public folder
+      const link = document.createElement('a');
+      link.href = `/gpx/${gpxData.fileName}`;
+      link.download = gpxData.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -174,9 +191,17 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
 
         {/* Actions */}
         <div className="space-y-3">
-          <button className="w-full bg-primary text-white py-4 rounded-2xl font-medium hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <button
+            onClick={handleDownloadGpx}
+            disabled={!gpxData}
+            className={`w-full py-4 rounded-2xl font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+              gpxData
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
             <Download className="w-5 h-5" />
-            Download GPX
+            {gpxData ? 'Download GPX' : 'GPX Not Available'}
           </button>
           <button className="w-full bg-gray-100 text-gray-900 py-4 rounded-2xl font-medium hover:bg-gray-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
             <Navigation className="w-5 h-5" />
