@@ -12,6 +12,7 @@ export interface Track {
   surface: 'road' | 'gravel' | 'mixed';
   thumbnail: string;
   isFavorite?: boolean;
+  coordinates?: { lat: number; lng: number };
 }
 
 interface TrackCardProps {

@@ -13,6 +13,7 @@ export const mockTracks: Track[] = [
     surface: 'road',
     thumbnail: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=400&h=300&fit=crop',
     isFavorite: false,
+    coordinates: { lat: 24.8607, lng: 55.2094 },
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ export const mockTracks: Track[] = [
     surface: 'road',
     thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
     isFavorite: true,
+    coordinates: { lat: 25.9574, lng: 56.1339 },
   },
   {
     id: '3',
@@ -35,6 +37,7 @@ export const mockTracks: Track[] = [
     surface: 'gravel',
     thumbnail: 'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&h=300&fit=crop',
     isFavorite: false,
+    coordinates: { lat: 24.8030, lng: 56.1281 },
   },
   {
     id: '4',
@@ -46,6 +49,7 @@ export const mockTracks: Track[] = [
     surface: 'road',
     thumbnail: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop',
     isFavorite: false,
+    coordinates: { lat: 24.4672, lng: 54.6031 },
   },
   {
     id: '5',
@@ -57,6 +61,7 @@ export const mockTracks: Track[] = [
     surface: 'mixed',
     thumbnail: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=400&h=300&fit=crop',
     isFavorite: false,
+    coordinates: { lat: 24.2544, lng: 54.6394 },
   },
   {
     id: '6',
@@ -68,6 +73,7 @@ export const mockTracks: Track[] = [
     surface: 'road',
     thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
     isFavorite: true,
+    coordinates: { lat: 24.0667, lng: 55.7833 },
   },
 ];
 
