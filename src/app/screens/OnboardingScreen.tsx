@@ -7,8 +7,8 @@ interface OnboardingScreenProps {
 
 export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
   return (
-    <div className="h-full bg-gradient-to-br from-blue-50 via-white to-emerald-50 flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center">
         {/* Logo/Icon */}
         <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mb-6 shadow-lg">
           <Bike className="w-14 h-14 text-white" />
@@ -61,14 +61,14 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
       </div>
 
       {/* Bottom CTA */}
-      <div className="p-6 bg-white border-t border-gray-200">
+      <div className="p-6 bg-white border-t border-gray-200 flex-shrink-0">
         <button
           onClick={onContinue}
           className="w-full bg-primary text-white py-4 rounded-2xl font-medium hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm mb-3"
         >
           Get Started
         </button>
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-gray-500 text-center pb-safe">
           By continuing, you agree to safe cycling practices and UAE traffic regulations
         </p>
       </div>
