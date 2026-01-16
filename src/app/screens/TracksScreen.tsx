@@ -56,11 +56,9 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   ].filter(Boolean).length;
 
   return (
-    <div className="h-full bg-white">
-      {/* Map Area */}
-      <div className="relative h-full bg-gradient-to-br from-blue-50 via-gray-50 to-emerald-50">
-        {/* Search and Filter Bar */}
-        <div className="absolute top-0 left-0 right-0 z-30 p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+    <div className="h-full bg-white relative">
+      {/* Search and Filter Bar - moved outside map, higher z-index */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
           <div className="flex gap-2">
             <SearchField
               value={searchQuery}
@@ -144,34 +142,33 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           )}
         </div>
 
-        {/* Real Map with Leaflet */}
-        <div className="absolute inset-0">
-          <MapView
-            tracks={filteredTracks
-              .filter(track => track.coordinates)
-              .map(track => ({
-                id: track.id,
-                name: track.name,
-                region: track.region,
-                difficulty: track.difficulty,
-                coordinates: track.coordinates!,
-                route: getRouteForTrack(track.id), // GPX route data
-              }))}
-            selectedTrackId={selectedTrackId}
-            onTrackSelect={handlePinClick}
-            onTrackOpen={onTrackClick}
-            showRoutes={true}
-          />
-        </div>
+      {/* Map Area */}
+      <div className="absolute inset-0 z-0">
+        <MapView
+          tracks={filteredTracks
+            .filter(track => track.coordinates)
+            .map(track => ({
+              id: track.id,
+              name: track.name,
+              region: track.region,
+              difficulty: track.difficulty,
+              coordinates: track.coordinates!,
+              route: getRouteForTrack(track.id), // GPX route data
+            }))}
+          selectedTrackId={selectedTrackId}
+          onTrackSelect={handlePinClick}
+          onTrackOpen={onTrackClick}
+          showRoutes={true}
+        />
+      </div>
 
-        {/* Track count overlay */}
-        <div className="absolute bottom-32 left-4 right-4 z-20 pointer-events-none">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 inline-flex items-center gap-2 shadow-sm">
-            <MapIcon className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium">
-              {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''}
-            </span>
-          </div>
+      {/* Track count overlay */}
+      <div className="absolute bottom-32 left-4 right-4 z-20 pointer-events-none">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 inline-flex items-center gap-2 shadow-sm">
+          <MapIcon className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium">
+            {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
