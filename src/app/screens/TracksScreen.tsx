@@ -159,6 +159,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
               }))}
             selectedTrackId={selectedTrackId}
             onTrackSelect={handlePinClick}
+            onTrackOpen={onTrackClick}
             showRoutes={true}
           />
         </div>

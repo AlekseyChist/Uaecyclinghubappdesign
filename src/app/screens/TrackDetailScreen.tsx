@@ -27,15 +27,28 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
   const gpxKey = Object.entries(gpxToTrackMapping).find(([_, id]) => id === track.id)?.[0];
   const gpxData = gpxKey ? gpxRoutes[gpxKey] : null;
 
-  const handleDownloadGpx = () => {
+  const handleDownloadGpx = async () => {
     if (gpxData) {
-      // Download from public folder
-      const link = document.createElement('a');
-      link.href = `/gpx/${gpxData.fileName}`;
-      link.download = gpxData.fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        // Encode filename for URL (handles spaces and special chars)
+        const encodedFileName = encodeURIComponent(gpxData.fileName);
+        const response = await fetch(`/gpx/${encodedFileName}`);
+
+        if (!response.ok) throw new Error('Download failed');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = gpxData.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('GPX download error:', error);
+        alert('Failed to download GPX file');
+      }
     }
   };
 

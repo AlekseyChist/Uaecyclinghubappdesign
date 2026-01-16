@@ -16,6 +16,7 @@ interface MapViewProps {
   tracks: MapTrack[];
   selectedTrackId?: string | null;
   onTrackSelect?: (trackId: string) => void;
+  onTrackOpen?: (trackId: string) => void;
   center?: [number, number];
   zoom?: number;
   showRoutes?: boolean;
@@ -97,10 +98,18 @@ export function MapView({
   tracks,
   selectedTrackId,
   onTrackSelect,
+  onTrackOpen,
   center = [24.4539, 54.3773], // UAE center (Abu Dhabi)
   zoom = 7,
   showRoutes = true
 }: MapViewProps) {
+  // Use route start point for marker position if available
+  const getMarkerPosition = (track: MapTrack): [number, number] => {
+    if (track.route && track.route.length > 0) {
+      return track.route[0];
+    }
+    return [track.coordinates.lat, track.coordinates.lng];
+  };
   return (
     <MapContainer
       center={center}
@@ -143,16 +152,24 @@ export function MapView({
       {tracks.map((track) => (
         <Marker
           key={track.id}
-          position={[track.coordinates.lat, track.coordinates.lng]}
+          position={getMarkerPosition(track)}
           icon={createMarkerIcon(track.difficulty, selectedTrackId === track.id)}
           eventHandlers={{
             click: () => onTrackSelect?.(track.id),
           }}
         >
           <Popup>
-            <div className="p-1">
-              <h3 className="font-medium text-sm">{track.name}</h3>
-              <p className="text-xs text-gray-500">{track.region}</p>
+            <div className="p-2 min-w-[140px]">
+              <h3 className="font-medium text-sm mb-1">{track.name}</h3>
+              <p className="text-xs text-gray-500 mb-2">{track.region}</p>
+              {onTrackOpen && (
+                <button
+                  onClick={() => onTrackOpen(track.id)}
+                  className="w-full bg-emerald-500 text-white text-xs py-1.5 px-3 rounded-lg font-medium hover:bg-emerald-600"
+                >
+                  View Details
+                </button>
+              )}
             </div>
           </Popup>
         </Marker>
