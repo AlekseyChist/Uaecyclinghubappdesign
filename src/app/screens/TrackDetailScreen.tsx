@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Heart, Share2, Download, Navigation, MapPin, Clock, TrendingUp, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { Chip } from '@/app/components/design-system/Chip';
+import { MiniMapPreview } from '@/app/components/map/MiniMapPreview';
 import type { TrackDetail } from '@/data/mockData';
-import { gpxRoutes, gpxToTrackMapping } from '@/data/gpxRouteData';
+import { gpxRoutes, gpxToTrackMapping, getRouteForTrack } from '@/data/gpxRouteData';
 
 interface TrackDetailScreenProps {
   track: TrackDetail;
@@ -26,6 +27,43 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
   // Find GPX file for this track
   const gpxKey = Object.entries(gpxToTrackMapping).find(([_, id]) => id === track.id)?.[0];
   const gpxData = gpxKey ? gpxRoutes[gpxKey] : null;
+
+  // Get route points for the mini map
+  const routePoints = getRouteForTrack(track.id);
+
+  // Get start point coordinates
+  const startPoint = gpxData?.startPoint || (routePoints && routePoints.length > 0
+    ? { lat: routePoints[0][0], lng: routePoints[0][1] }
+    : track.coordinates);
+
+  // Handle navigation to start point
+  const handleNavigateToStart = () => {
+    if (!startPoint) return;
+
+    const { lat, lng } = startPoint;
+
+    // Detect if on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    // Detect if on Android
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    let navigationUrl: string;
+
+    if (isIOS) {
+      // Apple Maps URL for iOS
+      navigationUrl = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+    } else if (isAndroid) {
+      // Google Maps URL for Android (opens in app if installed)
+      navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    } else {
+      // Default to Google Maps for desktop/other
+      navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    }
+
+    // Open navigation in a new tab/app
+    window.open(navigationUrl, '_blank');
+  };
 
   const handleDownloadGpx = async () => {
     if (gpxData) {
@@ -184,22 +222,21 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         {/* Mini Map Section */}
         <div>
           <h3 className="mb-3">Route Preview</h3>
-          <div className="bg-gradient-to-br from-blue-50 to-emerald-50 rounded-2xl h-48 relative overflow-hidden border border-gray-200">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-gray-400">
-                <MapPin className="w-12 h-12 mx-auto mb-2" />
-                <p className="text-sm">Map preview</p>
+          {routePoints && routePoints.length > 0 ? (
+            <MiniMapPreview
+              route={routePoints}
+              difficulty={track.difficulty}
+            />
+          ) : (
+            <div className="bg-gradient-to-br from-blue-50 to-emerald-50 rounded-2xl h-48 relative overflow-hidden border border-gray-200">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-gray-400">
+                  <MapPin className="w-12 h-12 mx-auto mb-2" />
+                  <p className="text-sm">Route preview not available</p>
+                </div>
               </div>
             </div>
-            {/* Start marker */}
-            <div className="absolute bottom-8 left-8 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-              START
-            </div>
-            {/* Finish marker */}
-            <div className="absolute top-8 right-8 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-              FINISH
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -216,7 +253,15 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
             <Download className="w-5 h-5" />
             {gpxData ? 'Download GPX' : 'GPX Not Available'}
           </button>
-          <button className="w-full bg-gray-100 text-gray-900 py-4 rounded-2xl font-medium hover:bg-gray-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <button
+            onClick={handleNavigateToStart}
+            disabled={!startPoint}
+            className={`w-full py-4 rounded-2xl font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+              startPoint
+                ? 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
             <Navigation className="w-5 h-5" />
             Navigate to Start
           </button>
