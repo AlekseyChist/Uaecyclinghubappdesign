@@ -99,7 +99,7 @@ export function MapView({
   selectedTrackId,
   onTrackSelect,
   onTrackOpen,
-  center = [24.4539, 54.3773], // UAE center (Abu Dhabi)
+  center = [44.0165, 21.0059], // Serbia center (near Kragujevac)
   zoom = 7,
   showRoutes = true
 }: MapViewProps) {

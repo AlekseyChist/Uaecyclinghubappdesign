@@ -7,7 +7,7 @@ interface OnboardingScreenProps {
 
 export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
   return (
-    <div className="h-full bg-gradient-to-br from-blue-50 via-white to-emerald-50 flex flex-col">
+    <div className="h-full bg-gradient-to-br from-orange-50 via-white to-amber-50 flex flex-col">
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="min-h-full flex flex-col items-center justify-center px-6 text-center py-8">
@@ -17,16 +17,16 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl mb-2">UAE Cycling Hub</h1>
+          <h1 className="text-2xl mb-2">DBB</h1>
           <p className="text-gray-600 mb-8 max-w-sm leading-relaxed text-sm">
-            Discover the best cycling tracks, connect with local shops, stay informed about regulations, and join exciting events across the Emirates.
+            Discover the best cycling tracks, connect with local shops, stay informed about regulations, and join exciting events.
           </p>
 
           {/* Features */}
           <div className="space-y-3 mb-8 max-w-md w-full">
             <div className="flex items-start gap-3 text-left">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-5 h-5 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium mb-0.5 text-sm">Explore Tracks</h3>
@@ -37,8 +37,8 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
             </div>
 
             <div className="flex items-start gap-3 text-left">
-              <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <Bike className="w-5 h-5 text-emerald-600" />
+              <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Bike className="w-5 h-5 text-amber-600" />
               </div>
               <div>
                 <h3 className="font-medium mb-0.5 text-sm">Local Shops</h3>
@@ -49,13 +49,13 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
             </div>
 
             <div className="flex items-start gap-3 text-left">
-              <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <Info className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Info className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
                 <h3 className="font-medium mb-0.5 text-sm">Stay Safe</h3>
                 <p className="text-xs text-gray-600">
-                  Access UAE cycling regulations and safety guidelines
+                  Access cycling regulations and safety guidelines
                 </p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           Get Started
         </button>
         <p className="text-xs text-gray-500 text-center">
-          By continuing, you agree to safe cycling practices and UAE traffic regulations
+          By continuing, you agree to follow safe cycling practices and traffic regulations
         </p>
       </div>
     </div>
