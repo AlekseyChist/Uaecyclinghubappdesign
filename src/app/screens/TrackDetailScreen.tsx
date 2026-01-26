@@ -270,7 +270,7 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         {/* Footer Note */}
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
           <p className="text-xs text-orange-900 leading-relaxed">
-            <strong>DBB Savet:</strong> Uvek proverite vremensku prognozu pre vožnje. U planinskim oblastima budite spremni na nagle promene vremena. Nosite kacigu i obavestite nekoga o svojoj ruti.
+            <strong>DBB Tip:</strong> Always check the weather forecast before your ride. In mountainous areas, be prepared for sudden weather changes. Wear a helmet and inform someone of your route.
           </p>
         </div>
       </div>

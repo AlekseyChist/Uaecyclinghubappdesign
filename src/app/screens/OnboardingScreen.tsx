@@ -19,7 +19,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           {/* Title */}
           <h1 className="text-2xl mb-2">DBB</h1>
           <p className="text-gray-600 mb-8 max-w-sm leading-relaxed text-sm">
-            Otkrijte najbolje biciklističke staze, povežite se sa lokalnim prodavnicama, budite informisani o propisima i pridružite se uzbudljivim događajima širom Srbije.
+            Discover the best cycling tracks, connect with local shops, stay informed about regulations, and join exciting events.
           </p>
 
           {/* Features */}
@@ -29,9 +29,9 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
                 <MapPin className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-medium mb-0.5 text-sm">Istražite Staze</h3>
+                <h3 className="font-medium mb-0.5 text-sm">Explore Tracks</h3>
                 <p className="text-xs text-gray-600">
-                  Pronađite popularne biciklističke rute sa detaljnim mapama i informacijama o bezbednosti
+                  Find popular cycling routes with detailed maps and safety information
                 </p>
               </div>
             </div>
@@ -41,9 +41,9 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
                 <Bike className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <h3 className="font-medium mb-0.5 text-sm">Lokalne Prodavnice</h3>
+                <h3 className="font-medium mb-0.5 text-sm">Local Shops</h3>
                 <p className="text-xs text-gray-600">
-                  Povežite se sa bike shopovima i sponzorima u vašem okruženju
+                  Connect with bike shops and sponsors in your area
                 </p>
               </div>
             </div>
@@ -53,9 +53,9 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
                 <Info className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h3 className="font-medium mb-0.5 text-sm">Budite Bezbedni</h3>
+                <h3 className="font-medium mb-0.5 text-sm">Stay Safe</h3>
                 <p className="text-xs text-gray-600">
-                  Pristupite saobraćajnim propisima i bezbednosnim smernicama za bicikliste
+                  Access cycling regulations and safety guidelines
                 </p>
               </div>
             </div>
@@ -69,10 +69,10 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           onClick={onContinue}
           className="w-full bg-primary text-white py-3.5 rounded-2xl font-medium hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm mb-2"
         >
-          Započni
+          Get Started
         </button>
         <p className="text-xs text-gray-500 text-center">
-          Nastavljanjem se slažete sa bezbednim biciklističkim praksama i saobraćajnim propisima
+          By continuing, you agree to follow safe cycling practices and traffic regulations
         </p>
       </div>
     </div>
