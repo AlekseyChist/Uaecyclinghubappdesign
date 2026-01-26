@@ -268,9 +268,9 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         </div>
 
         {/* Footer Note */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-          <p className="text-xs text-blue-900 leading-relaxed">
-            <strong>UAE Heat Advisory:</strong> During summer months (May-September), it's strongly recommended to ride before 7 AM or after 6 PM. Always carry sufficient water and inform someone of your route.
+        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
+          <p className="text-xs text-orange-900 leading-relaxed">
+            <strong>DBB Savet:</strong> Uvek proverite vremensku prognozu pre vožnje. U planinskim oblastima budite spremni na nagle promene vremena. Nosite kacigu i obavestite nekoga o svojoj ruti.
           </p>
         </div>
       </div>
