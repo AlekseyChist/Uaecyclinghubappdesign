@@ -27,9 +27,14 @@ type Screen =
   | { type: 'shop-detail'; shopId: string }
   | { type: 'event-detail'; eventId: string };
 
+// Club configuration - filter tracks by region
+const CLUB_REGION = 'Serbia';
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>({ type: 'onboarding' });
-  const [tracks, setTracks] = useState<Track[]>(mockTracks);
+  const [tracks, setTracks] = useState<Track[]>(
+    mockTracks.filter(track => track.region === CLUB_REGION)
+  );
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [shops] = useState<Shop[]>(mockShops);
 
