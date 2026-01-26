@@ -75,6 +75,30 @@ export const mockTracks: Track[] = [
     isFavorite: true,
     coordinates: { lat: 24.0667, lng: 55.7833 },
   },
+  {
+    id: '7',
+    name: 'DBB CR 2.0 LONG',
+    region: 'Serbia',
+    distance: 78,
+    elevation: 320,
+    difficulty: 'medium',
+    surface: 'road',
+    thumbnail: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop',
+    isFavorite: false,
+    coordinates: { lat: 44.80535, lng: 20.44608 },
+  },
+  {
+    id: '8',
+    name: 'DBB CR 5.0 EPIC',
+    region: 'Serbia',
+    distance: 98,
+    elevation: 450,
+    difficulty: 'hard',
+    surface: 'road',
+    thumbnail: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop',
+    isFavorite: false,
+    coordinates: { lat: 44.80536, lng: 20.44608 },
+  },
 ];
 
 export const mockEvents: Event[] = [
@@ -372,5 +396,27 @@ export const mockTrackDetails: Record<string, TrackDetail> = {
     ],
     startPoint: { lat: 24.0667, lng: 55.7833 },
     endPoint: { lat: 24.0667, lng: 55.7833 },
+  },
+  '7': {
+    ...mockTracks[6],
+    description: 'DBB CR 2.0 LONG is a scenic 78km road cycling route through the beautiful Serbian countryside. Features rolling hills, charming villages, and several cafe stops for refueling.',
+    safetyNotes: 'Group ride - stay with the pack. POI stops: km 30 Shelby cafe, km 40 101 Ruza cafe, km 54 Dea bakery, km 78 Supertramp lunch. Estimated time: 3-4 hours.',
+    estimatedTime: '3h 30min',
+    photos: [
+      'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=600&fit=crop',
+    ],
+    startPoint: { lat: 44.80535, lng: 20.44608 },
+    endPoint: { lat: 44.80535, lng: 20.44608 },
+  },
+  '8': {
+    ...mockTracks[7],
+    description: 'DBB CR 5.0 EPIC is the ultimate challenge - a 98km epic route through Serbia. This demanding ride takes you through diverse terrain with spectacular views and rewarding cafe stops.',
+    safetyNotes: 'Advanced riders only. POI stops: km 33 PerSu store, km 69 Gomex store, km 97 Dilemma brewery lunch. Estimated time: 3.5-4.5 hours. Bring sufficient nutrition and hydration.',
+    estimatedTime: '4h 00min',
+    photos: [
+      'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=600&fit=crop',
+    ],
+    startPoint: { lat: 44.80536, lng: 20.44608 },
+    endPoint: { lat: 44.80536, lng: 20.44608 },
   },
 };
