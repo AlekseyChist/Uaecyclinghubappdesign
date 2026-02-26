@@ -160,161 +160,129 @@ export const mockEvents: Event[] = [
 
 export const mockShops: Shop[] = [
   {
-    id: '1',
-    name: 'Wolfi\'s Bike Shop',
+    id: 'planetbike',
+    name: 'Planet Bike',
     category: 'Bike Shop & Service',
-    description: 'Premium bikes, parts, and professional service. Specialized dealer with expert mechanics.',
-    location: 'Dubai Marina',
-    website: 'https://example.com',
+    description: 'You can ask one of their shops to get what you need from another. We would not use their service.',
+    location: 'Belgrade and more',
+    link: 'https://planetbike.rs',
+    linkLabel: 'planetbike.rs',
+    logo: '/shops/planetbike.jpg',
+    tabs: ['shops'],
   },
   {
-    id: '2',
-    name: 'Revolution Cycles',
+    id: 'probike',
+    name: 'Probike',
+    category: 'Bike Shop & Service',
+    description: 'They now have a second shop on Svetogorska street. We would only use their service in a pinch.',
+    location: 'Belgrade',
+    link: 'https://probike.rs',
+    linkLabel: 'probike.rs',
+    logo: '/shops/probike.jpg',
+    tabs: ['shops'],
+  },
+  {
+    id: 'sportofis',
+    name: 'Sportofis',
     category: 'Bike Shop',
-    description: 'Road and mountain bikes from top brands. Full range of accessories and cycling gear.',
-    location: 'Abu Dhabi',
-    website: 'https://example.com',
+    description: 'A shop close by to both the recommended mechanics. There is a discount if you order online.',
+    location: 'Belgrade',
+    link: 'https://sportofis.com',
+    linkLabel: 'sportofis.com',
+    logo: '/shops/sportofis.png',
+    tabs: ['shops'],
   },
   {
-    id: '3',
-    name: 'Bike Hub UAE',
-    category: 'Service & Repairs',
-    description: 'Expert bike servicing, custom builds, and fitting services. Same-day repairs available.',
-    location: 'Dubai Sports City',
-    website: 'https://example.com',
+    id: 'dbb',
+    name: 'DBB Bike Rent',
+    category: 'Bike Rental',
+    description: 'Premium road/gravel bicycles with carbon frames & wheels fitted to your body geometry.',
+    location: 'Belgrade',
+    link: 'https://dropba.rs/rent',
+    linkLabel: 'dropba.rs/rent',
+    logo: '/shops/dbb.png',
+    tabs: ['shops', 'services'],
   },
   {
-    id: '4',
-    name: 'Pedal Power',
-    category: 'Sponsor',
-    description: 'Supporting the UAE cycling community through events and rider programs.',
-    website: 'https://example.com',
+    id: 'mihail',
+    name: 'Mihail Bajev',
+    category: 'Bike Service',
+    description: 'A high-level mechanic speaking English and Russian. A 10% service discount for DBB app users.',
+    location: 'Belgrade',
+    link: 'tel:+381641194005',
+    linkLabel: '+381641194005',
+    logo: '/shops/mihail.png',
+    tabs: ['services'],
+    isPersonal: true,
   },
   {
-    id: '5',
-    name: 'Cycle Safe UAE',
-    category: 'Sponsor',
-    description: 'Promoting cycling safety and awareness across the Emirates.',
-    website: 'https://example.com',
+    id: 'marko',
+    name: 'Marko Curčić',
+    category: 'Bike Service',
+    description: 'A high-level mechanic speaking English. He tends to be too busy to also manage appointments.',
+    location: 'Belgrade',
+    link: 'tel:+381641557332',
+    linkLabel: '+381641557332',
+    logo: '/shops/marko.png',
+    tabs: ['services'],
+    isPersonal: true,
+  },
+  {
+    id: 'denis',
+    name: 'Denis Chertkov',
+    category: 'Sports Massage',
+    description: 'A medical rehabilitation and massage therapist. An individual discount for DBB app users.',
+    location: 'Belgrade',
+    link: 'https://physioscience.ru/en',
+    linkLabel: 'physioscience.ru/en',
+    logo: '/shops/denis.png',
+    tabs: ['services'],
+    isPersonal: true,
+  },
+  {
+    id: 'recoverypoint',
+    name: 'Recovery Point',
+    category: 'Sports Massage',
+    description: 'Female and male sports massage therapists. A 20% discount on the first visit for DBB app users.',
+    location: 'Belgrade',
+    link: 'https://dikidi.net/891836',
+    linkLabel: 'dikidi.net/891836',
+    logo: '/shops/recoverypoint.jpg',
+    tabs: ['services'],
   },
 ];
 
-export const mockRegulations = [
+export interface Rule {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export const mockRules: Rule[] = [
   {
     id: '1',
-    category: 'Road Safety',
-    items: [
-      {
-        id: '1-1',
-        title: 'Cycling Lanes',
-        content: 'Always use designated cycling lanes where available. Stay in single file when riding on roads.',
-      },
-      {
-        id: '1-2',
-        title: 'Traffic Rules',
-        content: 'Obey all traffic signals and signs. Cyclists must follow the same rules as motor vehicles.',
-      },
-      {
-        id: '1-3',
-        title: 'Road Position',
-        content: 'Ride on the right side of the road. Keep a safe distance from parked vehicles to avoid door collisions.',
-      },
-    ],
+    title: 'Use a Proper bike',
+    content: 'Well, use whatever bike & gear, but if one crashes while riding an improper bike or without a properly fitting helmet, we will presume his or her sole responsibility \u2014 for both potential injuries and material damage \u2014 even if the crash was accidentally caused by another group member. There is a reason.',
   },
   {
     id: '2',
-    category: 'Group Ride Etiquette',
-    items: [
-      {
-        id: '2-1',
-        title: 'Paceline Protocol',
-        content: 'Maintain steady speed when leading. Signal before pulling off. Avoid sudden braking.',
-      },
-      {
-        id: '2-2',
-        title: 'Communication',
-        content: 'Call out hazards, turns, and stops. Use hand signals for turning and slowing down.',
-      },
-      {
-        id: '2-3',
-        title: 'Group Size',
-        content: 'Large groups should split into smaller packs of 8-12 riders for safety and traffic flow.',
-      },
-    ],
+    title: 'Proper are Road & Gravel bikes',
+    content: 'Improper bikes for riding in a group are: \u2022 time-trial or triathlon bikes, or bikes with attached aerobars, \u2022 flat-bar or other bikes with wide handlebars, \u2022 fixed-gear bikes without at least a front brake, \u2022 bikes with potential or actual significant malfunctions.',
   },
   {
     id: '3',
-    category: 'Required Equipment',
-    items: [
-      {
-        id: '3-1',
-        title: 'Helmet',
-        content: 'Helmets are mandatory for all riders. Ensure proper fit and certification standards.',
-      },
-      {
-        id: '3-2',
-        title: 'Lights',
-        content: 'Front white light and rear red light required for low-light conditions. Recommended for all rides.',
-      },
-      {
-        id: '3-3',
-        title: 'Reflective Gear',
-        content: 'Wear bright, reflective clothing to increase visibility, especially during dawn and dusk.',
-      },
-    ],
+    title: 'All your picture are belong to us',
+    content: 'People make photos & videos during our events and we will use them in any way your imaginary lawyer could imagine \u2014 but mostly in our Instagram \u2014 for which you grant us your irrevocable consent if you happen to be there. Club members have the right of access to all said images.',
   },
   {
     id: '4',
-    category: 'Shared Paths',
-    items: [
-      {
-        id: '4-1',
-        title: 'Pedestrian Priority',
-        content: 'Pedestrians have right of way on shared paths. Ring bell and announce when passing.',
-      },
-      {
-        id: '4-2',
-        title: 'Speed Control',
-        content: 'Reduce speed on crowded paths. Maximum 20 km/h on most shared pathways.',
-      },
-    ],
+    title: 'You accept the Disclaimer',
+    content: 'All the rides are organised by Baranchikov & Partners Ltd, a legal entity that you can sue if anything makes you unhappy. Alexander Baranchikov, the sole proprietor of said entity, will do his best to make you happy, but accepts no personal legal responsibility for that.',
   },
   {
     id: '5',
-    category: 'Desert Heat Guidelines',
-    items: [
-      {
-        id: '5-1',
-        title: 'Hydration',
-        content: 'Carry at least 2 water bottles. Drink regularly, not just when thirsty. Consider electrolyte drinks.',
-      },
-      {
-        id: '5-2',
-        title: 'Timing',
-        content: 'Avoid riding between 11 AM - 3 PM during summer months. Early morning rides (before 7 AM) recommended.',
-      },
-      {
-        id: '5-3',
-        title: 'Sun Protection',
-        content: 'Use sunscreen SPF 50+, wear UV-protective clothing, and sunglasses. Watch for heat exhaustion symptoms.',
-      },
-    ],
-  },
-  {
-    id: '6',
-    category: 'Emergency Information',
-    items: [
-      {
-        id: '6-1',
-        title: 'Emergency Numbers',
-        content: 'Police: 999, Ambulance: 998. Always carry ID and emergency contact information.',
-      },
-      {
-        id: '6-2',
-        title: 'Breakdown Kit',
-        content: 'Carry spare tube, tire levers, multi-tool, pump or CO2, and basic first aid supplies.',
-      },
-    ],
+    title: 'Obey The Rules',
+    content: 'If you come to our rides, you accept The Rules. And to enjoy any group ride you should also know the tips.',
   },
 ];
 
