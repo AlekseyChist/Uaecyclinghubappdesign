@@ -252,122 +252,37 @@ export const mockShops: Shop[] = [
   },
 ];
 
-export const mockRegulations = [
+export interface Rule {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export const mockRules: Rule[] = [
   {
     id: '1',
-    category: 'Road Safety',
-    items: [
-      {
-        id: '1-1',
-        title: 'Cycling Lanes',
-        content: 'Always use designated cycling lanes where available. Stay in single file when riding on roads.',
-      },
-      {
-        id: '1-2',
-        title: 'Traffic Rules',
-        content: 'Obey all traffic signals and signs. Cyclists must follow the same rules as motor vehicles.',
-      },
-      {
-        id: '1-3',
-        title: 'Road Position',
-        content: 'Ride on the right side of the road. Keep a safe distance from parked vehicles to avoid door collisions.',
-      },
-    ],
+    title: 'Use a Proper bike',
+    content: 'Well, use whatever bike & gear, but if one crashes while riding an improper bike or without a properly fitting helmet, we will presume his or her sole responsibility \u2014 for both potential injuries and material damage \u2014 even if the crash was accidentally caused by another group member. There is a reason.',
   },
   {
     id: '2',
-    category: 'Group Ride Etiquette',
-    items: [
-      {
-        id: '2-1',
-        title: 'Paceline Protocol',
-        content: 'Maintain steady speed when leading. Signal before pulling off. Avoid sudden braking.',
-      },
-      {
-        id: '2-2',
-        title: 'Communication',
-        content: 'Call out hazards, turns, and stops. Use hand signals for turning and slowing down.',
-      },
-      {
-        id: '2-3',
-        title: 'Group Size',
-        content: 'Large groups should split into smaller packs of 8-12 riders for safety and traffic flow.',
-      },
-    ],
+    title: 'Proper are Road & Gravel bikes',
+    content: 'Improper bikes for riding in a group are: \u2022 time-trial or triathlon bikes, or bikes with attached aerobars, \u2022 flat-bar or other bikes with wide handlebars, \u2022 fixed-gear bikes without at least a front brake, \u2022 bikes with potential or actual significant malfunctions.',
   },
   {
     id: '3',
-    category: 'Required Equipment',
-    items: [
-      {
-        id: '3-1',
-        title: 'Helmet',
-        content: 'Helmets are mandatory for all riders. Ensure proper fit and certification standards.',
-      },
-      {
-        id: '3-2',
-        title: 'Lights',
-        content: 'Front white light and rear red light required for low-light conditions. Recommended for all rides.',
-      },
-      {
-        id: '3-3',
-        title: 'Reflective Gear',
-        content: 'Wear bright, reflective clothing to increase visibility, especially during dawn and dusk.',
-      },
-    ],
+    title: 'All your picture are belong to us',
+    content: 'People make photos & videos during our events and we will use them in any way your imaginary lawyer could imagine \u2014 but mostly in our Instagram \u2014 for which you grant us your irrevocable consent if you happen to be there. Club members have the right of access to all said images.',
   },
   {
     id: '4',
-    category: 'Shared Paths',
-    items: [
-      {
-        id: '4-1',
-        title: 'Pedestrian Priority',
-        content: 'Pedestrians have right of way on shared paths. Ring bell and announce when passing.',
-      },
-      {
-        id: '4-2',
-        title: 'Speed Control',
-        content: 'Reduce speed on crowded paths. Maximum 20 km/h on most shared pathways.',
-      },
-    ],
+    title: 'You accept the Disclaimer',
+    content: 'All the rides are organised by Baranchikov & Partners Ltd, a legal entity that you can sue if anything makes you unhappy. Alexander Baranchikov, the sole proprietor of said entity, will do his best to make you happy, but accepts no personal legal responsibility for that.',
   },
   {
     id: '5',
-    category: 'Desert Heat Guidelines',
-    items: [
-      {
-        id: '5-1',
-        title: 'Hydration',
-        content: 'Carry at least 2 water bottles. Drink regularly, not just when thirsty. Consider electrolyte drinks.',
-      },
-      {
-        id: '5-2',
-        title: 'Timing',
-        content: 'Avoid riding between 11 AM - 3 PM during summer months. Early morning rides (before 7 AM) recommended.',
-      },
-      {
-        id: '5-3',
-        title: 'Sun Protection',
-        content: 'Use sunscreen SPF 50+, wear UV-protective clothing, and sunglasses. Watch for heat exhaustion symptoms.',
-      },
-    ],
-  },
-  {
-    id: '6',
-    category: 'Emergency Information',
-    items: [
-      {
-        id: '6-1',
-        title: 'Emergency Numbers',
-        content: 'Police: 999, Ambulance: 998. Always carry ID and emergency contact information.',
-      },
-      {
-        id: '6-2',
-        title: 'Breakdown Kit',
-        content: 'Carry spare tube, tire levers, multi-tool, pump or CO2, and basic first aid supplies.',
-      },
-    ],
+    title: 'Obey The Rules',
+    content: 'If you come to our rides, you accept The Rules. And to enjoy any group ride you should also know the tips.',
   },
 ];
 
