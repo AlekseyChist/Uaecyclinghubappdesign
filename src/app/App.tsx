@@ -5,7 +5,6 @@ import { OnboardingScreen } from '@/app/screens/OnboardingScreen';
 import { TracksScreen } from '@/app/screens/TracksScreen';
 import { TrackDetailScreen } from '@/app/screens/TrackDetailScreen';
 import { ShopsScreen } from '@/app/screens/ShopsScreen';
-import { ShopDetailScreen } from '@/app/screens/ShopDetailScreen';
 import { RegulationsScreen } from '@/app/screens/RegulationsScreen';
 import { EventsScreen } from '@/app/screens/EventsScreen';
 import { EventDetailScreen } from '@/app/screens/EventDetailScreen';
@@ -18,13 +17,11 @@ import {
 } from '@/data/mockData';
 import type { Track } from '@/app/components/cards/TrackCard';
 import type { Event } from '@/app/components/cards/EventCard';
-import type { Shop } from '@/app/components/cards/ShopCard';
 
 type Screen =
   | { type: 'onboarding' }
   | { type: 'main'; tab: TabType }
   | { type: 'track-detail'; trackId: string }
-  | { type: 'shop-detail'; shopId: string }
   | { type: 'event-detail'; eventId: string };
 
 // Club configuration - filter tracks by region
@@ -36,7 +33,6 @@ export default function App() {
     mockTracks.filter(track => track.region === CLUB_REGION)
   );
   const [events, setEvents] = useState<Event[]>(mockEvents);
-  const [shops] = useState<Shop[]>(mockShops);
 
   const handleOnboardingComplete = () => {
     setCurrentScreen({ type: 'main', tab: 'tracks' });
@@ -50,10 +46,6 @@ export default function App() {
     setCurrentScreen({ type: 'track-detail', trackId });
   };
 
-  const handleShopClick = (shopId: string) => {
-    setCurrentScreen({ type: 'shop-detail', shopId });
-  };
-
   const handleEventClick = (eventId: string) => {
     setCurrentScreen({ type: 'event-detail', eventId });
   };
@@ -61,8 +53,6 @@ export default function App() {
   const handleBack = () => {
     if (currentScreen.type === 'track-detail') {
       setCurrentScreen({ type: 'main', tab: 'tracks' });
-    } else if (currentScreen.type === 'shop-detail') {
-      setCurrentScreen({ type: 'main', tab: 'shops' });
     } else if (currentScreen.type === 'event-detail') {
       setCurrentScreen({ type: 'main', tab: 'events' });
     }
@@ -117,17 +107,6 @@ export default function App() {
     );
   }
 
-  // Render shop detail
-  if (currentScreen.type === 'shop-detail') {
-    const shop = shops.find((s) => s.id === currentScreen.shopId);
-    
-    if (!shop) {
-      return <div>Shop not found</div>;
-    }
-
-    return <ShopDetailScreen shop={shop} onBack={handleBack} />;
-  }
-
   // Render event detail
   if (currentScreen.type === 'event-detail') {
     const event = events.find((e) => e.id === currentScreen.eventId);
@@ -161,7 +140,7 @@ export default function App() {
           />
         )}
         {activeTab === 'shops' && (
-          <ShopsScreen shops={shops} onShopClick={handleShopClick} />
+          <ShopsScreen shops={mockShops} />
         )}
         {activeTab === 'regulations' && (
           <RegulationsScreen regulations={mockRegulations} />
