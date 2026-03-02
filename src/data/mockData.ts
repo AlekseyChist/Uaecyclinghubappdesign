@@ -252,37 +252,101 @@ export const mockShops: Shop[] = [
   },
 ];
 
-export interface Rule {
+export interface RegulationItem {
   id: string;
   title: string;
   content: string;
 }
 
-export const mockRules: Rule[] = [
+export interface RegulationCategory {
+  id: string;
+  category: string;
+  items: RegulationItem[];
+}
+
+export const mockRegulations: RegulationCategory[] = [
   {
-    id: '1',
-    title: 'Use a Proper bike',
-    content: 'Well, use whatever bike & gear, but if one crashes while riding an improper bike or without a properly fitting helmet, we will presume his or her sole responsibility \u2014 for both potential injuries and material damage \u2014 even if the crash was accidentally caused by another group member. There is a reason.',
+    id: 'dbb-rules',
+    category: 'DBB Rules',
+    items: [
+      {
+        id: 'dbb-1',
+        title: '1. Use a Proper bike',
+        content: 'Well, use whatever bike & gear, but if one crashes while riding an improper bike or without a properly fitting helmet, we will presume his or her sole responsibility \u2014 for both potential injuries and material damage \u2014 even if the crash was accidentally caused by another group member. There is a reason.',
+      },
+      {
+        id: 'dbb-2',
+        title: '2. Proper are Road & Gravel bikes',
+        content: 'Improper bikes for riding in a group are:\n\u2022 time-trial or triathlon bikes, or bikes with attached aerobars,\n\u2022 flat-bar or other bikes with wide handlebars,\n\u2022 fixed-gear bikes without at least a front brake,\n\u2022 bikes with potential or actual significant malfunctions.',
+      },
+      {
+        id: 'dbb-3',
+        title: '3. All your picture are belong to us',
+        content: 'People make photos & videos during our events and we will use them in any way your imaginary lawyer could imagine \u2014 but mostly in our Instagram \u2014 for which you grant us your irrevocable consent if you happen to be there. Club members have the right of access to all said images.',
+      },
+      {
+        id: 'dbb-4',
+        title: '4. You accept the Disclaimer',
+        content: 'All the rides are organised by Baranchikov & Partners Ltd, a legal entity that you can sue if anything makes you unhappy. Alexander Baranchikov, the sole proprietor of said entity, will do his best to make you happy, but accepts no personal legal responsibility for that.',
+      },
+      {
+        id: 'dbb-5',
+        title: '5. Obey the Rules',
+        content: 'If you come to our rides, you accept The Rules. And to enjoy any group ride you should also know the tips.',
+      },
+    ],
   },
   {
-    id: '2',
-    title: 'Proper are Road & Gravel bikes',
-    content: 'Improper bikes for riding in a group are: \u2022 time-trial or triathlon bikes, or bikes with attached aerobars, \u2022 flat-bar or other bikes with wide handlebars, \u2022 fixed-gear bikes without at least a front brake, \u2022 bikes with potential or actual significant malfunctions.',
+    id: 'traffic-rules',
+    category: 'Traffic Rules to Obey',
+    items: [
+      {
+        id: 'traffic-1',
+        title: 'No drunk riding',
+        content: 'The acceptable blood alcohol limit for cyclists is 0.2 mg/ml (one beer should be just fine).\nArt. 187 p. 3 of the Law',
+      },
+      {
+        id: 'traffic-2',
+        title: 'Ride on the road',
+        content: 'A bicycle is a vehicle, same as a car. Thus, using pedestrian paths for cycling is forbidden.\nArt. 7 p. 32 of the Law',
+      },
+      {
+        id: 'traffic-3',
+        title: 'No earphones',
+        content: 'No riding with earphones in both ears. One earphone is okay (but impolite for a group ride).\nArt. 90 p. 7 of the Law',
+      },
+      {
+        id: 'traffic-4',
+        title: 'Bicycle lights',
+        content: 'Steady lights, white front and red back, shall be used during nighttime, fog, and/or rain.\nArt. 81 p. 5 of the Law',
+      },
+    ],
   },
   {
-    id: '3',
-    title: 'All your picture are belong to us',
-    content: 'People make photos & videos during our events and we will use them in any way your imaginary lawyer could imagine \u2014 but mostly in our Instagram \u2014 for which you grant us your irrevocable consent if you happen to be there. Club members have the right of access to all said images.',
-  },
-  {
-    id: '4',
-    title: 'You accept the Disclaimer',
-    content: 'All the rides are organised by Baranchikov & Partners Ltd, a legal entity that you can sue if anything makes you unhappy. Alexander Baranchikov, the sole proprietor of said entity, will do his best to make you happy, but accepts no personal legal responsibility for that.',
-  },
-  {
-    id: '5',
-    title: 'Obey The Rules',
-    content: 'If you come to our rides, you accept The Rules. And to enjoy any group ride you should also know the tips.',
+    id: 'other-traffic',
+    category: 'Other Traffic Rules',
+    items: [
+      {
+        id: 'other-1',
+        title: 'Helmet ignorance',
+        content: "A helmet on a bicycle is not required by law. According to us, not wearing one on a sporty bike suggests one didn\u2019t use that brain anyway.\nNo provision of the Law",
+      },
+      {
+        id: 'other-2',
+        title: 'A meter rule',
+        content: "Cyclists should stay within one meter from the right side of the road \u2014 unless turning left, overtaking or avoiding an obstacle. Let\u2019s just say we avoid obstacles all the time.\nArt. 40 p. 1 of the Law",
+      },
+      {
+        id: 'other-3',
+        title: 'Always single',
+        content: 'In a group, cyclists are obliged to go one after another, not two abreast. For our safety, we tend to ride, legally, in two groups where, according to the law, one overtakes the other slowly but steadily.\nArt. 89 p. 4 of the Law',
+      },
+      {
+        id: 'other-4',
+        title: 'Mandatory paths',
+        content: "Cyclists are obliged to use a cycling path if there is one, in which case the road should not be used. Said paths are often in such poor state that we can\u2019t even recognise them \u2014 and hence keep on the road.\nArt. 89 p. 1 of the Law",
+      },
+    ],
   },
 ];
 
