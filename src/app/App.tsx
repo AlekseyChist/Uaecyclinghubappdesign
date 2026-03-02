@@ -12,7 +12,7 @@ import {
   mockTracks,
   mockEvents,
   mockShops,
-  mockRules,
+  mockRegulations,
   mockTrackDetails,
 } from '@/data/mockData';
 import type { Track } from '@/app/components/cards/TrackCard';
@@ -143,7 +143,7 @@ export default function App() {
           <ShopsScreen shops={mockShops} />
         )}
         {activeTab === 'regulations' && (
-          <RegulationsScreen rules={mockRules} />
+          <RegulationsScreen regulations={mockRegulations} />
         )}
         {activeTab === 'events' && (
           <EventsScreen events={events} onEventClick={handleEventClick} />
