@@ -28,6 +28,7 @@ async function getAccessToken(): Promise<string> {
 
   // Return cached token if still valid (with 5 min buffer)
   if (cachedAccessToken && tokenExpiresAt > now + 300) {
+    console.log('[Strava] Using cached access token, expires at', new Date(tokenExpiresAt * 1000).toISOString());
     return cachedAccessToken;
   }
 
@@ -35,9 +36,22 @@ async function getAccessToken(): Promise<string> {
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
   const refreshToken = currentRefreshToken || process.env.STRAVA_REFRESH_TOKEN;
 
+  // Log which env vars are present (not their values!)
+  console.log('[Strava] Token refresh - env check:', {
+    hasClientId: !!clientId,
+    clientIdLength: clientId?.length || 0,
+    hasClientSecret: !!clientSecret,
+    clientSecretLength: clientSecret?.length || 0,
+    hasRefreshToken: !!refreshToken,
+    refreshTokenLength: refreshToken?.length || 0,
+    usingCachedRefreshToken: !!currentRefreshToken,
+  });
+
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('STRAVA_NOT_CONFIGURED');
   }
+
+  console.log('[Strava] Requesting token refresh from Strava OAuth...');
 
   const response = await fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -52,10 +66,22 @@ async function getAccessToken(): Promise<string> {
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('[Strava] Token refresh FAILED:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+    });
     throw new Error(`Strava token refresh failed: ${response.status} ${errorText}`);
   }
 
   const data: TokenResponse = await response.json();
+
+  console.log('[Strava] Token refresh SUCCESS:', {
+    tokenType: data.token_type,
+    expiresAt: new Date(data.expires_at * 1000).toISOString(),
+    expiresIn: data.expires_in,
+    hasNewRefreshToken: !!data.refresh_token,
+  });
 
   // Cache the new tokens
   cachedAccessToken = data.access_token;
@@ -82,27 +108,52 @@ export default async function handler(req: any, res: any) {
 
   const clubId = req.query.club_id || 'dbb-';
 
+  // Diagnostic mode: ?debug=1 returns config check without calling Strava
+  if (req.query.debug === '1') {
+    return res.status(200).json({
+      status: 'diagnostic',
+      clubId,
+      env: {
+        hasClientId: !!process.env.STRAVA_CLIENT_ID,
+        clientIdLength: process.env.STRAVA_CLIENT_ID?.length || 0,
+        hasClientSecret: !!process.env.STRAVA_CLIENT_SECRET,
+        clientSecretLength: process.env.STRAVA_CLIENT_SECRET?.length || 0,
+        hasRefreshToken: !!process.env.STRAVA_REFRESH_TOKEN,
+        refreshTokenLength: process.env.STRAVA_REFRESH_TOKEN?.length || 0,
+      },
+      cache: {
+        hasCachedToken: !!cachedAccessToken,
+        tokenExpiresAt: tokenExpiresAt ? new Date(tokenExpiresAt * 1000).toISOString() : null,
+        hasCachedRefreshToken: !!currentRefreshToken,
+      },
+    });
+  }
+
   try {
+    console.log(`[Strava] Fetching club events for club: ${clubId}`);
     const accessToken = await getAccessToken();
 
-    const stravaResponse = await fetch(
-      `https://www.strava.com/api/v3/clubs/${clubId}/group_events`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const eventsUrl = `https://www.strava.com/api/v3/clubs/${clubId}/group_events`;
+    console.log(`[Strava] Calling: ${eventsUrl}`);
+
+    const stravaResponse = await fetch(eventsUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    console.log(`[Strava] Events response: ${stravaResponse.status} ${stravaResponse.statusText}`);
 
     if (!stravaResponse.ok) {
       const errorText = await stravaResponse.text();
-      console.error(`Strava API error ${stravaResponse.status}:`, errorText);
+      console.error(`[Strava] Events API error ${stravaResponse.status}:`, errorText);
 
       // Return specific error messages for common cases
       if (stravaResponse.status === 401 || stravaResponse.status === 403) {
         return res.status(stravaResponse.status).json({
           error: 'Strava authorization failed',
           message: 'Access token is invalid or expired. Check your Strava API credentials.',
+          stravStatus: stravaResponse.status,
           details: errorText,
         });
       }
@@ -123,6 +174,8 @@ export default async function handler(req: any, res: any) {
     }
 
     const events = await stravaResponse.json();
+
+    console.log(`[Strava] SUCCESS: Got ${Array.isArray(events) ? events.length : '?'} events for club ${clubId}`);
 
     // Cache for 5 minutes
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
