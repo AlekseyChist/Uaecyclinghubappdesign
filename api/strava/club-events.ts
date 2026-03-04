@@ -18,10 +18,49 @@ interface TokenResponse {
   refresh_token: string;
 }
 
-// In-memory token cache (persists across warm invocations)
+// In-memory cache (persists across warm invocations)
 let cachedAccessToken: string | null = null;
 let tokenExpiresAt = 0;
 let currentRefreshToken: string | null = null;
+// Cache resolved numeric club IDs
+const clubIdCache: Record<string, number> = {};
+
+/**
+ * Resolve a club slug (e.g. "dbb-") to a numeric Strava club ID.
+ * The /clubs/{slug}/group_events endpoint requires numeric IDs.
+ */
+async function resolveClubId(slugOrId: string, accessToken: string): Promise<string> {
+  // If already numeric, return as-is
+  if (/^\d+$/.test(slugOrId)) {
+    return slugOrId;
+  }
+
+  // Check cache
+  if (clubIdCache[slugOrId]) {
+    console.log(`[Strava] Using cached numeric ID for "${slugOrId}": ${clubIdCache[slugOrId]}`);
+    return String(clubIdCache[slugOrId]);
+  }
+
+  console.log(`[Strava] Resolving slug "${slugOrId}" to numeric club ID...`);
+
+  const response = await fetch(`https://www.strava.com/api/v3/clubs/${slugOrId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`[Strava] Failed to resolve club slug "${slugOrId}": ${response.status}`, errorText);
+    throw new Error(`Club "${slugOrId}" not found on Strava (${response.status})`);
+  }
+
+  const club = await response.json();
+  const numericId = club.id;
+
+  console.log(`[Strava] Resolved "${slugOrId}" -> numeric ID ${numericId} (name: "${club.name}", member_count: ${club.member_count})`);
+
+  clubIdCache[slugOrId] = numericId;
+  return String(numericId);
+}
 
 async function getAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
@@ -133,7 +172,11 @@ export default async function handler(req: any, res: any) {
     console.log(`[Strava] Fetching club events for club: ${clubId}`);
     const accessToken = await getAccessToken();
 
-    const eventsUrl = `https://www.strava.com/api/v3/clubs/${clubId}/group_events`;
+    // Resolve slug to numeric ID (Strava group_events requires numeric ID)
+    const numericClubId = await resolveClubId(clubId, accessToken);
+    console.log(`[Strava] Using numeric club ID: ${numericClubId} (from: ${clubId})`);
+
+    const eventsUrl = `https://www.strava.com/api/v3/clubs/${numericClubId}/group_events`;
     console.log(`[Strava] Calling: ${eventsUrl}`);
 
     const stravaResponse = await fetch(eventsUrl, {
