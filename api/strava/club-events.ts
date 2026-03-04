@@ -176,54 +176,75 @@ export default async function handler(req: any, res: any) {
     const numericClubId = await resolveClubId(clubId, accessToken);
     console.log(`[Strava] Using numeric club ID: ${numericClubId} (from: ${clubId})`);
 
-    const eventsUrl = `https://www.strava.com/api/v3/clubs/${numericClubId}/group_events`;
-    console.log(`[Strava] Calling: ${eventsUrl}`);
+    // Fetch all pages of events (Strava may paginate results)
+    let allEvents: any[] = [];
+    let page = 1;
+    const perPage = 200; // Request maximum per page
 
-    const stravaResponse = await fetch(eventsUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    while (true) {
+      const eventsUrl = `https://www.strava.com/api/v3/clubs/${numericClubId}/group_events?page=${page}&per_page=${perPage}`;
+      console.log(`[Strava] Calling: ${eventsUrl}`);
 
-    console.log(`[Strava] Events response: ${stravaResponse.status} ${stravaResponse.statusText}`);
-
-    if (!stravaResponse.ok) {
-      const errorText = await stravaResponse.text();
-      console.error(`[Strava] Events API error ${stravaResponse.status}:`, errorText);
-
-      // Return specific error messages for common cases
-      if (stravaResponse.status === 401 || stravaResponse.status === 403) {
-        return res.status(stravaResponse.status).json({
-          error: 'Strava authorization failed',
-          message: 'Access token is invalid or expired. Check your Strava API credentials.',
-          stravStatus: stravaResponse.status,
-          details: errorText,
-        });
-      }
-
-      if (stravaResponse.status === 404) {
-        return res.status(404).json({
-          error: 'Club not found',
-          message: `Club "${clubId}" was not found on Strava. Verify the club ID.`,
-          details: errorText,
-        });
-      }
-
-      return res.status(stravaResponse.status).json({
-        error: 'Strava API error',
-        message: `Strava returned status ${stravaResponse.status}`,
-        details: errorText,
+      const stravaResponse = await fetch(eventsUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
+
+      console.log(`[Strava] Events response (page ${page}): ${stravaResponse.status} ${stravaResponse.statusText}`);
+
+      if (!stravaResponse.ok) {
+        const errorText = await stravaResponse.text();
+        console.error(`[Strava] Events API error ${stravaResponse.status}:`, errorText);
+
+        if (stravaResponse.status === 401 || stravaResponse.status === 403) {
+          return res.status(stravaResponse.status).json({
+            error: 'Strava authorization failed',
+            message: 'Access token is invalid or expired. Check your Strava API credentials.',
+            stravStatus: stravaResponse.status,
+            details: errorText,
+          });
+        }
+
+        if (stravaResponse.status === 404) {
+          return res.status(404).json({
+            error: 'Club not found',
+            message: `Club "${clubId}" was not found on Strava. Verify the club ID.`,
+            details: errorText,
+          });
+        }
+
+        return res.status(stravaResponse.status).json({
+          error: 'Strava API error',
+          message: `Strava returned status ${stravaResponse.status}`,
+          details: errorText,
+        });
+      }
+
+      const events = await stravaResponse.json();
+      const pageEvents = Array.isArray(events) ? events : [];
+      console.log(`[Strava] Page ${page}: got ${pageEvents.length} events`);
+
+      allEvents = allEvents.concat(pageEvents);
+
+      // If we got fewer than perPage, we've reached the last page
+      if (pageEvents.length < perPage) {
+        break;
+      }
+      page++;
+
+      // Safety limit
+      if (page > 10) break;
     }
 
-    const events = await stravaResponse.json();
-
-    console.log(`[Strava] SUCCESS: Got ${Array.isArray(events) ? events.length : '?'} events for club ${clubId}`);
+    console.log(`[Strava] SUCCESS: Got ${allEvents.length} total events for club ${clubId}`,
+      allEvents.map((e: any) => ({ id: e.id, title: e.title, occurrences: e.upcoming_occurrences?.length || 0 }))
+    );
 
     // Cache for 5 minutes
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
 
-    return res.status(200).json(events);
+    return res.status(200).json(allEvents);
   } catch (error: any) {
     // If Strava is not configured, return a clear indicator (not empty array)
     if (error.message === 'STRAVA_NOT_CONFIGURED') {
