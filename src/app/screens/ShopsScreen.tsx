@@ -31,8 +31,6 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
-          <h1 className="text-2xl mb-4">Shops, Services & Friends</h1>
-
           {/* Segmented Control */}
           <div className="flex bg-gray-100 rounded-2xl p-1 mb-4">
             {(['shops', 'services', 'friends'] as const).map((tab) => (

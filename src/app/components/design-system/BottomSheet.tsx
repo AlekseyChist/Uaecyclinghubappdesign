@@ -9,10 +9,13 @@ interface BottomSheetProps {
   onStateChange?: (state: BottomSheetState) => void;
 }
 
+// Bottom nav is ~60px tall; sheet sits above it
+const BOTTOM_NAV_HEIGHT = 60;
+
 const stateHeights: Record<BottomSheetState, string> = {
   collapsed: '120px',
   half: '50vh',
-  full: 'calc(100vh - 80px)',
+  full: 'calc(100vh - 120px)',
 };
 
 export function BottomSheet({ children, state = 'collapsed', onStateChange }: BottomSheetProps) {
@@ -39,7 +42,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
     const deltaY = startY - clientY;
     const newHeight = currentHeight + deltaY;
 
-    if (newHeight >= 120 && newHeight <= window.innerHeight - 80) {
+    if (newHeight >= 120 && newHeight <= window.innerHeight - 120) {
       setCurrentHeight(newHeight);
     }
   };
@@ -57,7 +60,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
       setCurrentHeight(window.innerHeight * 0.5);
     } else {
       newState = 'full';
-      setCurrentHeight(window.innerHeight - 80);
+      setCurrentHeight(window.innerHeight - 120);
     }
 
     setCurrentState(newState);
@@ -83,8 +86,9 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
   return (
     <div
       ref={sheetRef}
-      className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out bottom-sheet-container"
+      className="fixed left-0 right-0 bg-white rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out bottom-sheet-container"
       style={{
+        bottom: `${BOTTOM_NAV_HEIGHT}px`,
         height: isDragging ? `${currentHeight}px` : stateHeights[currentState],
       }}
     >
