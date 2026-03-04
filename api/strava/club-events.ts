@@ -36,7 +36,7 @@ async function getAccessToken(): Promise<string> {
   const refreshToken = currentRefreshToken || process.env.STRAVA_REFRESH_TOKEN;
 
   if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error('Missing Strava API credentials in environment variables');
+    throw new Error('STRAVA_NOT_CONFIGURED');
   }
 
   const response = await fetch('https://www.strava.com/oauth/token', {
@@ -109,6 +109,10 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json(events);
   } catch (error: any) {
+    // If Strava is not configured, return empty array (not an error)
+    if (error.message === 'STRAVA_NOT_CONFIGURED') {
+      return res.status(200).json([]);
+    }
     console.error('Club events API error:', error);
     return res.status(500).json({
       error: 'Internal server error',

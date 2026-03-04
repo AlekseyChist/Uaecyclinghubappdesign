@@ -97,7 +97,8 @@ export async function fetchClubEvents(): Promise<ClubEvent[]> {
   const response = await fetch(`${API_BASE}/strava/club-events?club_id=${STRAVA_CLUB_ID}`);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch club events: ${response.status}`);
+    console.warn(`Strava club events returned ${response.status}, falling back to empty list`);
+    return [];
   }
 
   const stravaEvents: StravaGroupEvent[] = await response.json();
