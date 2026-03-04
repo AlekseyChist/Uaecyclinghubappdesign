@@ -96,8 +96,28 @@ export default async function handler(req: any, res: any) {
 
     if (!stravaResponse.ok) {
       const errorText = await stravaResponse.text();
+      console.error(`Strava API error ${stravaResponse.status}:`, errorText);
+
+      // Return specific error messages for common cases
+      if (stravaResponse.status === 401 || stravaResponse.status === 403) {
+        return res.status(stravaResponse.status).json({
+          error: 'Strava authorization failed',
+          message: 'Access token is invalid or expired. Check your Strava API credentials.',
+          details: errorText,
+        });
+      }
+
+      if (stravaResponse.status === 404) {
+        return res.status(404).json({
+          error: 'Club not found',
+          message: `Club "${clubId}" was not found on Strava. Verify the club ID.`,
+          details: errorText,
+        });
+      }
+
       return res.status(stravaResponse.status).json({
         error: 'Strava API error',
+        message: `Strava returned status ${stravaResponse.status}`,
         details: errorText,
       });
     }
@@ -109,9 +129,12 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json(events);
   } catch (error: any) {
-    // If Strava is not configured, return empty array (not an error)
+    // If Strava is not configured, return a clear indicator (not empty array)
     if (error.message === 'STRAVA_NOT_CONFIGURED') {
-      return res.status(200).json([]);
+      return res.status(200).json({
+        status: 'not_configured',
+        message: 'Strava API credentials are not set. Configure STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN.',
+      });
     }
     console.error('Club events API error:', error);
     return res.status(500).json({

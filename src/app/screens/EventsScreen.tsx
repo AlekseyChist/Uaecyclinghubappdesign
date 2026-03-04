@@ -158,17 +158,31 @@ export function EventsScreen({
 
         {/* Error state */}
         {clubEventsError && (
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl mb-4">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl mb-4">
+            <AlertCircle className="w-5 h-5 text-[#FC4C02] flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-700">Could not load club events</p>
-              <p className="text-xs text-red-600 mt-0.5">{clubEventsError}</p>
-              <button
-                onClick={onRefreshClubEvents}
-                className="text-xs font-medium text-red-700 underline mt-1"
-              >
-                Try again
-              </button>
+              <p className="text-sm font-medium text-gray-700">
+                Showing scheduled club events
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Live sync with Strava is temporarily unavailable. Check the club for the latest updates.
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <a
+                  href="https://www.strava.com/clubs/dbb-"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-[#FC4C02] underline"
+                >
+                  Open DBB Club on Strava
+                </a>
+                <button
+                  onClick={onRefreshClubEvents}
+                  className="text-xs font-medium text-gray-500 underline"
+                >
+                  Retry
+                </button>
+              </div>
             </div>
           </div>
         )}

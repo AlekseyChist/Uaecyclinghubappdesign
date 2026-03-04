@@ -94,14 +94,39 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
 }
 
 export async function fetchClubEvents(): Promise<ClubEvent[]> {
-  const response = await fetch(`${API_BASE}/strava/club-events?club_id=${STRAVA_CLUB_ID}`);
+  let response: Response;
 
-  if (!response.ok) {
-    console.warn(`Strava club events returned ${response.status}, falling back to empty list`);
-    return [];
+  try {
+    response = await fetch(`${API_BASE}/strava/club-events?club_id=${STRAVA_CLUB_ID}`);
+  } catch (err) {
+    throw new Error(
+      'Cannot connect to Strava API. Check that the API server is running and VITE_API_BASE_URL is configured.'
+    );
   }
 
-  const stravaEvents: StravaGroupEvent[] = await response.json();
+  if (!response.ok) {
+    let details = '';
+    try {
+      const body = await response.json();
+      details = body.message || body.error || '';
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(
+      `Strava API error (${response.status})${details ? ': ' + details : ''}`
+    );
+  }
+
+  const body = await response.json();
+
+  // Check if API returned a "not configured" indicator
+  if (body && body.status === 'not_configured') {
+    throw new Error(
+      'Strava API is not configured. Set STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN.'
+    );
+  }
+
+  const stravaEvents: StravaGroupEvent[] = Array.isArray(body) ? body : [];
 
   // Map and flatten all upcoming occurrences
   const clubEvents = stravaEvents.flatMap(mapStravaEventToClubEvent);
