@@ -53,7 +53,7 @@ export function ShopCard({ shop }: ShopCardProps) {
             <p className="text-xs text-gray-500">{shop.category}</p>
           </div>
 
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+          <p className="text-sm text-gray-600 mb-2 line-clamp-3">
             {shop.description}
           </p>
 
