@@ -72,12 +72,22 @@ export function EventDetailScreen({ event, onBack, onSaveToggle }: EventDetailSc
       </div>
 
       {/* Hero Banner */}
-      <div className="bg-gradient-to-br from-blue-500 to-primary h-48 relative overflow-hidden">
+      <div className={`h-48 relative overflow-hidden ${
+        event.isFromStrava
+          ? 'bg-gradient-to-br from-[#FC4C02] to-[#E34402]'
+          : 'bg-gradient-to-br from-blue-500 to-primary'
+      }`}>
         <div className="absolute inset-0 bg-black/10" />
         <div className="relative h-full flex items-center justify-center">
           <div className="text-center text-white">
-            <Calendar className="w-16 h-16 mx-auto mb-3 opacity-50" />
-            <p className="text-sm font-medium opacity-90">Event</p>
+            {event.isFromStrava ? (
+              <svg className="w-16 h-16 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+            ) : (
+              <Calendar className="w-16 h-16 mx-auto mb-3 opacity-50" />
+            )}
+            <p className="text-sm font-medium opacity-90">
+              {event.isFromStrava ? 'DBB Club Event' : 'Event'}
+            </p>
           </div>
         </div>
       </div>
@@ -127,11 +137,26 @@ export function EventDetailScreen({ event, onBack, onSaveToggle }: EventDetailSc
           )}
         </div>
 
+        {/* Organizer (Strava events) */}
+        {event.isFromStrava && event.organizer && (
+          <div className="flex items-center gap-3 p-3 bg-[#FC4C02]/5 rounded-xl border border-[#FC4C02]/10">
+            <div className="w-10 h-10 rounded-full bg-[#FC4C02]/10 flex items-center justify-center">
+              <Users className="w-5 h-5 text-[#FC4C02]" />
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Organized by</div>
+              <div className="text-sm font-medium">{event.organizer}</div>
+            </div>
+          </div>
+        )}
+
         {/* Description */}
         <div>
           <h3 className="mb-2">About this event</h3>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Join fellow cyclists for an exciting {typeLabels[event.type].toLowerCase()} through the beautiful landscapes of {event.location}. This event is perfect for riders of all levels looking to challenge themselves and connect with the cycling community.
+            {event.isFromStrava && event.description
+              ? event.description
+              : `Join fellow cyclists for an exciting ${typeLabels[event.type].toLowerCase()} through the beautiful landscapes of ${event.location}. This event is perfect for riders of all levels looking to challenge themselves and connect with the cycling community.`}
           </p>
         </div>
 
@@ -193,13 +218,23 @@ export function EventDetailScreen({ event, onBack, onSaveToggle }: EventDetailSc
             <Calendar className="w-5 h-5" />
             Add to Calendar
           </button>
-          <button
-            className="w-full bg-gray-100 text-gray-900 py-4 rounded-2xl font-medium hover:bg-gray-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            onClick={() => window.open('https://example.com', '_blank')}
-          >
-            <ExternalLink className="w-5 h-5" />
-            Open Organizer Site
-          </button>
+          {event.isFromStrava && event.stravaEventId ? (
+            <button
+              className="w-full bg-[#FC4C02] text-white py-4 rounded-2xl font-medium hover:bg-[#FC4C02]/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              onClick={() => window.open(`https://www.strava.com/clubs/dbb-/group_events/${event.stravaEventId}`, '_blank')}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+              Open in Strava
+            </button>
+          ) : (
+            <button
+              className="w-full bg-gray-100 text-gray-900 py-4 rounded-2xl font-medium hover:bg-gray-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              onClick={() => window.open('https://example.com', '_blank')}
+            >
+              <ExternalLink className="w-5 h-5" />
+              Open Organizer Site
+            </button>
+          )}
         </div>
 
         {/* Footer Note */}

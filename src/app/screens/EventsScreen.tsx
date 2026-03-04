@@ -2,23 +2,47 @@ import React, { useState } from 'react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { EventCard, Event } from '@/app/components/cards/EventCard';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
-import { Calendar } from 'lucide-react';
+import { Calendar, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface EventsScreenProps {
   events: Event[];
+  clubEvents: Event[];
+  isLoadingClubEvents: boolean;
+  clubEventsError: string | null;
   onEventClick: (eventId: string) => void;
+  onRefreshClubEvents: () => void;
 }
 
-export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
+type SourceFilter = 'all' | 'club' | 'community';
+
+export function EventsScreen({
+  events,
+  clubEvents,
+  isLoadingClubEvents,
+  clubEventsError,
+  onEventClick,
+  onRefreshClubEvents,
+}: EventsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'this-month'>('upcoming');
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const now = new Date();
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
 
-  const filteredEvents = events
+  // Merge both event sources
+  const allEvents = [
+    ...clubEvents,
+    ...events.map((e) => ({ ...e, isFromStrava: false })),
+  ];
+
+  const filteredEvents = allEvents
     .filter((event) => {
+      // Source filter
+      if (sourceFilter === 'club' && !event.isFromStrava) return false;
+      if (sourceFilter === 'community' && event.isFromStrava) return false;
+
       const matchesSearch =
         event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -55,9 +79,42 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
-          <h1 className="text-2xl mb-4">Events</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl">Events</h1>
+            {clubEvents.length > 0 && (
+              <button
+                onClick={onRefreshClubEvents}
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                title="Refresh club events"
+              >
+                <RefreshCw className={`w-4 h-4 text-gray-600 ${isLoadingClubEvents ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+          </div>
 
-          {/* Filter Chips */}
+          {/* Source Filter */}
+          <div className="flex gap-2 mb-3">
+            {(['all', 'club', 'community'] as SourceFilter[]).map((source) => (
+              <button
+                key={source}
+                onClick={() => setSourceFilter(source)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  sourceFilter === source
+                    ? source === 'club'
+                      ? 'bg-[#FC4C02] text-white'
+                      : 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {source === 'club' && (
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+                )}
+                {source === 'all' ? 'All' : source === 'club' ? 'DBB Club' : 'Community'}
+              </button>
+            ))}
+          </div>
+
+          {/* Time Filter */}
           <div className="flex gap-2 mb-4">
             {['upcoming', 'this-month', 'all'].map((type) => (
               <button
@@ -88,7 +145,35 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
 
       {/* Content */}
       <div className="p-4">
-        {filteredEvents.length === 0 ? (
+        {/* Loading state for club events */}
+        {isLoadingClubEvents && clubEvents.length === 0 && (
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl mb-4">
+            <RefreshCw className="w-5 h-5 text-[#FC4C02] animate-spin flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-gray-700">Loading club events from Strava...</p>
+              <p className="text-xs text-gray-500">Fetching latest DBB club events</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {clubEventsError && (
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl mb-4">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-700">Could not load club events</p>
+              <p className="text-xs text-red-600 mt-0.5">{clubEventsError}</p>
+              <button
+                onClick={onRefreshClubEvents}
+                className="text-xs font-medium text-red-700 underline mt-1"
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {filteredEvents.length === 0 && !isLoadingClubEvents ? (
           <EmptyState
             icon={Calendar}
             title="No events found"
@@ -98,7 +183,7 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
           <div className="space-y-6">
             {Object.entries(groupedEvents).map(([monthYear, monthEvents]) => (
               <div key={monthYear}>
-                <div className="sticky top-[180px] bg-white py-2 mb-3 border-b border-gray-100">
+                <div className="sticky top-[240px] bg-white py-2 mb-3 border-b border-gray-100">
                   <h3 className="text-sm text-gray-500">{monthYear}</h3>
                 </div>
                 <div className="space-y-3">
