@@ -258,7 +258,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://sonderbelgrade.com',
     linkLabel: 'sonderbelgrade.com',
-    logo: '/shops/sonder.png',
+    logo: '/shops/Sonder Logo.png',
     tabs: ['friends'],
   },
   {
@@ -269,7 +269,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://dechkotzar.com',
     linkLabel: 'dechkotzar.com',
-    logo: '/shops/dechkotzar.png',
+    logo: '/shops/DechkoTzar Logo.png',
     tabs: ['friends'],
   },
   {
@@ -280,7 +280,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://chopchop.one/belgrade',
     linkLabel: 'chopchop.one/belgrade',
-    logo: '/shops/chopchop.png',
+    logo: '/shops/Chop-Chop Logo.png',
     tabs: ['friends'],
   },
 ];
