@@ -2,84 +2,97 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchClubEvents, ClubEvent } from '@/services/stravaService';
 
 // Fallback club events shown when Strava API is unavailable
+// These are the recurring DBB club events from Strava
 function getFallbackClubEvents(): ClubEvent[] {
   const now = new Date();
 
-  // Generate upcoming Saturday dates for the next 4 weeks
-  const getNextSaturday = (weeksFromNow: number): Date => {
+  // Find the next occurrence of a given weekday (0=Sun, 1=Mon, ..., 6=Sat)
+  const getNextWeekday = (weekday: number, weeksFromNow = 0): Date => {
     const date = new Date(now);
-    const dayOfWeek = date.getDay();
-    const daysUntilSaturday = (6 - dayOfWeek + 7) % 7 || 7;
-    date.setDate(date.getDate() + daysUntilSaturday + (weeksFromNow - 1) * 7);
-    date.setHours(8, 0, 0, 0);
+    const diff = (weekday - date.getDay() + 7) % 7 || 7;
+    date.setDate(date.getDate() + diff + weeksFromNow * 7);
     return date;
   };
 
-  const getNextSunday = (weeksFromNow: number): Date => {
-    const date = getNextSaturday(weeksFromNow);
-    date.setDate(date.getDate() + 1);
-    date.setHours(8, 0, 0, 0);
-    return date;
-  };
+  const formatDate = (d: Date): string => d.toISOString().split('T')[0];
 
+  // Filter out past events
   return [
-    {
-      id: 'strava-fallback-1',
-      name: 'DBB Saturday Community Ride',
-      date: getNextSaturday(1).toISOString().split('T')[0],
-      time: '08:00 AM',
-      location: 'Belgrade, Serbia',
-      type: 'group-ride',
-      status: 'upcoming',
-      isSaved: false,
-      description: 'Weekly Saturday community ride. Check Strava club for the latest route and details.',
-      organizer: 'DBB Club',
-      activityType: 'Ride',
-      isFromStrava: true,
-    },
-    {
-      id: 'strava-fallback-2',
-      name: 'DBB Sunday Recovery Ride',
-      date: getNextSunday(1).toISOString().split('T')[0],
-      time: '09:00 AM',
-      location: 'Belgrade, Serbia',
-      type: 'group-ride',
-      status: 'upcoming',
-      isSaved: false,
-      description: 'Easy-pace Sunday recovery ride. Check Strava club for details.',
-      organizer: 'DBB Club',
-      activityType: 'Ride',
-      isFromStrava: true,
-    },
-    {
-      id: 'strava-fallback-3',
-      name: 'DBB Saturday Community Ride',
-      date: getNextSaturday(2).toISOString().split('T')[0],
-      time: '08:00 AM',
-      location: 'Belgrade, Serbia',
-      type: 'group-ride',
-      status: 'upcoming',
-      isSaved: false,
-      description: 'Weekly Saturday community ride. Check Strava club for the latest route and details.',
-      organizer: 'DBB Club',
-      activityType: 'Ride',
-      isFromStrava: true,
-    },
-    {
-      id: 'strava-fallback-4',
-      name: 'DBB Saturday Community Ride',
-      date: getNextSaturday(3).toISOString().split('T')[0],
-      time: '08:00 AM',
-      location: 'Belgrade, Serbia',
-      type: 'group-ride',
-      status: 'upcoming',
-      isSaved: false,
-      description: 'Weekly Saturday community ride. Check Strava club for the latest route and details.',
-      organizer: 'DBB Club',
-      activityType: 'Ride',
-      isFromStrava: true,
-    },
-  ];
+    // DBB Dark-On-Draft — every Thursday 6:00 PM
+    ...[0, 1, 2, 3].map((w) => {
+      const d = getNextWeekday(4, w); // Thursday
+      return {
+        id: `strava-fallback-dod-${w}`,
+        name: 'DBB Dark-On-Draft',
+        date: formatDate(d),
+        time: '06:00 PM',
+        location: 'Belgrade, Serbia',
+        type: 'group-ride' as const,
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: 'Evening workout ride. Check Strava club for the latest route and meeting point.',
+        organizer: 'DBB Club',
+        activityType: 'Ride',
+        isFromStrava: true,
+      };
+    }),
+    // DBB Coffee Ride — every Saturday 9:30 AM
+    ...[0, 1, 2, 3].map((w) => {
+      const d = getNextWeekday(6, w); // Saturday
+      return {
+        id: `strava-fallback-cr-${w}`,
+        name: 'DBB Coffee Ride',
+        date: formatDate(d),
+        time: '09:30 AM',
+        location: 'Žorža Klemansoa 27V, Belgrade, Serbia',
+        type: 'group-ride' as const,
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: 'Social weekend coffee ride. Check Strava club for the latest route and details.',
+        organizer: 'DBB Club',
+        activityType: 'Ride',
+        isFromStrava: true,
+      };
+    }),
+    // DBB Rekafary Ride — Wednesday 8:00 AM (recurring)
+    ...[0, 1, 2, 3].map((w) => {
+      const d = getNextWeekday(3, w); // Wednesday
+      return {
+        id: `strava-fallback-rek-${w}`,
+        name: 'DBB Rekafary Ride',
+        date: formatDate(d),
+        time: '08:00 AM',
+        location: 'Savsko pristanište, Belgrade, Serbia',
+        type: 'group-ride' as const,
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: 'Social morning ride. Check Strava club for the latest route and details.',
+        organizer: 'DBB Club',
+        activityType: 'Ride',
+        isFromStrava: true,
+      };
+    }),
+    // DBB Burekfast Club — Tuesday 7:00 AM (recurring)
+    ...[0, 1, 2, 3].map((w) => {
+      const d = getNextWeekday(2, w); // Tuesday
+      return {
+        id: `strava-fallback-bf-${w}`,
+        name: 'DBB Burekfast Club',
+        date: formatDate(d),
+        time: '07:00 AM',
+        location: 'Gundulićev venac, Belgrade, Serbia',
+        type: 'granfondo' as const,
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: 'Workout morning ride. Check Strava club for the latest route and details.',
+        organizer: 'DBB Club',
+        activityType: 'Ride',
+        isFromStrava: true,
+      };
+    }),
+  ]
+    .filter((e) => new Date(e.date) >= now)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 interface UseClubEventsResult {
