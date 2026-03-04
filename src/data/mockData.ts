@@ -101,62 +101,7 @@ export const mockTracks: Track[] = [
   },
 ];
 
-export const mockEvents: Event[] = [
-  {
-    id: '1',
-    name: 'UAE Tour Challenge',
-    date: '2026-02-15',
-    time: '06:00 AM',
-    location: 'Dubai Autodrome',
-    type: 'race',
-    distanceOptions: ['60km', '100km', '160km'],
-    status: 'upcoming',
-    isSaved: false,
-  },
-  {
-    id: '2',
-    name: 'Al Qudra Gran Fondo',
-    date: '2026-03-08',
-    time: '07:00 AM',
-    location: 'Al Qudra Lakes',
-    type: 'granfondo',
-    distanceOptions: ['50km', '86km'],
-    status: 'upcoming',
-    isSaved: true,
-  },
-  {
-    id: '3',
-    name: 'Friday Group Ride - Abu Dhabi',
-    date: '2026-01-17',
-    time: '06:30 AM',
-    location: 'Yas Marina Circuit',
-    type: 'group-ride',
-    status: 'upcoming',
-    isSaved: false,
-  },
-  {
-    id: '4',
-    name: 'Jebel Jais Hill Climb',
-    date: '2026-04-12',
-    time: '08:00 AM',
-    location: 'Ras Al Khaimah',
-    type: 'race',
-    distanceOptions: ['32km'],
-    status: 'sold-out',
-    isSaved: false,
-  },
-  {
-    id: '5',
-    name: 'Desert Century',
-    date: '2026-05-20',
-    time: '05:30 AM',
-    location: 'Al Ain',
-    type: 'granfondo',
-    distanceOptions: ['100km', '160km'],
-    status: 'canceled',
-    isSaved: false,
-  },
-];
+export const mockEvents: Event[] = [];
 
 export const mockShops: Shop[] = [
   {
