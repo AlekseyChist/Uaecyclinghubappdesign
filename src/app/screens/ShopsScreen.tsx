@@ -4,7 +4,7 @@ import { ShopCard, Shop } from '@/app/components/cards/ShopCard';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
 import { Store } from 'lucide-react';
 
-type ShopTab = 'shops' | 'services';
+type ShopTab = 'shops' | 'services' | 'friends';
 
 interface ShopsScreenProps {
   shops: Shop[];
@@ -31,11 +31,11 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
-          <h1 className="text-2xl mb-4">Shops & Services</h1>
+          <h1 className="text-2xl mb-4">Shops, Services & Friends</h1>
 
           {/* Segmented Control */}
           <div className="flex bg-gray-100 rounded-2xl p-1 mb-4">
-            {(['shops', 'services'] as const).map((tab) => (
+            {(['shops', 'services', 'friends'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -45,7 +45,7 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
                     : 'text-gray-600'
                 }`}
               >
-                {tab === 'shops' ? 'Shops' : 'Services'}
+                {tab === 'shops' ? 'Shops' : tab === 'services' ? 'Services' : 'Friends'}
               </button>
             ))}
           </div>

@@ -10,7 +10,7 @@ export interface Shop {
   link: string;
   linkLabel: string;
   logo?: string;
-  tabs: ('shops' | 'services')[];
+  tabs: ('shops' | 'services' | 'friends')[];
   isPersonal?: boolean;
 }
 
