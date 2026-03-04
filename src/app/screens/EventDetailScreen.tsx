@@ -99,7 +99,10 @@ export function EventDetailScreen({ event, onBack, onSaveToggle }: EventDetailSc
           <h1 className="text-2xl mb-3">{event.name}</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <Chip>{typeLabels[event.type]}</Chip>
-            {event.status !== 'upcoming' && (
+            {event.status === 'recurring' && (
+              <Chip>Recurring</Chip>
+            )}
+            {event.status !== 'upcoming' && event.status !== 'recurring' && (
               <Chip variant={event.status === 'sold-out' ? 'default' : 'hard'}>
                 {event.status === 'sold-out' ? 'Sold Out' : 'Canceled'}
               </Chip>
@@ -258,6 +261,14 @@ export function EventDetailScreen({ event, onBack, onSaveToggle }: EventDetailSc
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
             <p className="text-xs text-red-900 leading-relaxed">
               <strong>Event Canceled:</strong> This event has been canceled. Contact the organizer for refund information or rescheduling details.
+            </p>
+          </div>
+        )}
+
+        {event.status === 'recurring' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+            <p className="text-xs text-blue-900 leading-relaxed">
+              <strong>Recurring Event:</strong> This event runs on a regular schedule. The next occurrence date may not yet be listed. Check the Strava club page for the latest schedule.
             </p>
           </div>
         )}

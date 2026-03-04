@@ -34,7 +34,7 @@ export interface ClubEvent {
   location: string;
   type: 'race' | 'granfondo' | 'group-ride';
   distanceOptions?: string[];
-  status: 'upcoming' | 'sold-out' | 'canceled';
+  status: 'upcoming' | 'sold-out' | 'canceled' | 'recurring';
   isSaved?: boolean;
   // Strava-specific fields
   description?: string;
@@ -83,9 +83,28 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
     // Try to use the event even without upcoming dates
     const allDates = event.upcoming_occurrences || [];
     if (allDates.length > 0) {
-      // Has dates but all in the past — skip
-      console.log(`[Strava] Skipping "${event.title}" — all ${allDates.length} occurrences are in the past`);
-      return [];
+      // Has dates but all in the past — this is likely a recurring event
+      // whose next occurrence hasn't been scheduled yet by Strava.
+      // Use the most recent past occurrence so the event still appears.
+      const sortedPast = allDates
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+      const mostRecent = sortedPast[0];
+      console.log(`[Strava] Event "${event.title}" has ${allDates.length} past occurrences, using most recent: ${mostRecent}`);
+      return [{
+        id: `strava-${event.id}`,
+        name: event.title,
+        date: new Date(mostRecent).toISOString().split('T')[0],
+        time: formatTime(mostRecent),
+        location: event.address || 'See Strava for details',
+        type: mapSkillToType(event.skill_levels),
+        status: 'recurring' as const,
+        isSaved: false,
+        description: event.description,
+        organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
+        activityType: event.activity_type,
+        stravaEventId: event.id,
+        isFromStrava: true,
+      }];
     }
 
     // No upcoming_occurrences at all — still show the event with created_at date

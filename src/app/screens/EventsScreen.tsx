@@ -50,7 +50,7 @@ export function EventsScreen({
       const eventDate = new Date(event.date);
       const matchesFilter =
         filterType === 'all' ||
-        (filterType === 'upcoming' && eventDate >= now) ||
+        (filterType === 'upcoming' && (eventDate >= now || event.status === 'recurring')) ||
         (filterType === 'this-month' &&
           eventDate.getMonth() === thisMonth &&
           eventDate.getFullYear() === thisYear);

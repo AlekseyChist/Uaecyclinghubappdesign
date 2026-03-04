@@ -10,7 +10,7 @@ export interface Event {
   location: string;
   type: 'race' | 'granfondo' | 'group-ride';
   distanceOptions?: string[];
-  status: 'upcoming' | 'sold-out' | 'canceled';
+  status: 'upcoming' | 'sold-out' | 'canceled' | 'recurring';
   isSaved?: boolean;
   // Strava-specific fields
   description?: string;
@@ -35,6 +35,7 @@ const statusStyles = {
   upcoming: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   'sold-out': 'bg-gray-50 text-gray-700 border-gray-200',
   canceled: 'bg-red-50 text-red-700 border-red-200',
+  recurring: 'bg-blue-50 text-blue-700 border-blue-200',
 };
 
 export function EventCard({ event, onClick }: EventCardProps) {
@@ -88,7 +89,14 @@ export function EventCard({ event, onClick }: EventCardProps) {
                 {event.distanceOptions.join(' / ')}
               </span>
             )}
-            {event.status !== 'upcoming' && (
+            {event.status === 'recurring' && (
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs ${statusStyles.recurring}`}
+              >
+                Recurring
+              </span>
+            )}
+            {event.status !== 'upcoming' && event.status !== 'recurring' && (
               <span
                 className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs ${statusStyles[event.status]}`}
               >
