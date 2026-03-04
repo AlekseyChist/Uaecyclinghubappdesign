@@ -15,6 +15,7 @@ import {
   mockRegulations,
   mockTrackDetails,
 } from '@/data/mockData';
+import { useClubEvents } from '@/hooks/useClubEvents';
 import type { Track } from '@/app/components/cards/TrackCard';
 import type { Event } from '@/app/components/cards/EventCard';
 
@@ -33,6 +34,7 @@ export default function App() {
     mockTracks.filter(track => track.region === CLUB_REGION)
   );
   const [events, setEvents] = useState<Event[]>(mockEvents);
+  const { clubEvents, isLoading: isLoadingClubEvents, error: clubEventsError, refetch: refetchClubEvents } = useClubEvents();
 
   const handleOnboardingComplete = () => {
     setCurrentScreen({ type: 'main', tab: 'tracks' });
@@ -109,8 +111,9 @@ export default function App() {
 
   // Render event detail
   if (currentScreen.type === 'event-detail') {
-    const event = events.find((e) => e.id === currentScreen.eventId);
-    
+    const event = events.find((e) => e.id === currentScreen.eventId)
+      || clubEvents.find((e) => e.id === currentScreen.eventId);
+
     if (!event) {
       return <div>Event not found</div>;
     }
@@ -146,7 +149,14 @@ export default function App() {
           <RegulationsScreen regulations={mockRegulations} />
         )}
         {activeTab === 'events' && (
-          <EventsScreen events={events} onEventClick={handleEventClick} />
+          <EventsScreen
+            events={events}
+            clubEvents={clubEvents as Event[]}
+            isLoadingClubEvents={isLoadingClubEvents}
+            clubEventsError={clubEventsError}
+            onEventClick={handleEventClick}
+            onRefreshClubEvents={refetchClubEvents}
+          />
         )}
       </div>
 

@@ -12,6 +12,12 @@ export interface Event {
   distanceOptions?: string[];
   status: 'upcoming' | 'sold-out' | 'canceled';
   isSaved?: boolean;
+  // Strava-specific fields
+  description?: string;
+  organizer?: string;
+  activityType?: string;
+  stravaEventId?: number;
+  isFromStrava?: boolean;
 }
 
 interface EventCardProps {
@@ -71,6 +77,12 @@ export function EventCard({ event, onClick }: EventCardProps) {
           
           <div className="flex items-center gap-2 flex-wrap">
             <Chip size="sm">{typeLabels[event.type]}</Chip>
+            {event.isFromStrava && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FC4C02]/10 text-[#FC4C02] text-xs font-medium border border-[#FC4C02]/20">
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+                Strava
+              </span>
+            )}
             {event.distanceOptions && (
               <span className="text-xs text-gray-500">
                 {event.distanceOptions.join(' / ')}
