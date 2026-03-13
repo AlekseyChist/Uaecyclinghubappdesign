@@ -12,7 +12,6 @@ import {
   mockEvents,
   mockShops,
   mockRegulations,
-  mockTrackDetails,
 } from '../data/mockData';
 
 import { useClubEvents } from '../hooks/useClubEvents';
@@ -120,15 +119,14 @@ export default function App() {
 
   if (currentScreen.type === 'track-detail') {
     const track = tracks.find((t) => t.id === currentScreen.trackId);
-    const trackDetail = mockTrackDetails[currentScreen.trackId];
-    
-    if (!track || !trackDetail) {
+
+    if (!track) {
       return <div>Track not found</div>;
     }
 
     return (
       <TrackDetailScreen
-        track={{ ...trackDetail, isFavorite: track.isFavorite }}
+        track={track}
         onBack={handleBack}
         onFavoriteToggle={() => handleFavoriteToggle(track.id)}
       />
