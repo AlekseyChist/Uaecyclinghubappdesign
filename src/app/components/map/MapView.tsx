@@ -3,11 +3,13 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+type Difficulty = 'easy' | 'norm' | 'long' | 'hard' | 'epic';
+
 export interface MapTrack {
   id: string;
   name: string;
   region: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: Difficulty;
   coordinates: { lat: number; lng: number };
   route?: [number, number][]; // Array of [lat, lng] points for the route line
 }
@@ -23,14 +25,16 @@ interface MapViewProps {
 }
 
 // Colors by difficulty
-const difficultyColors = {
+const difficultyColors: Record<Difficulty, string> = {
   easy: '#10b981',
-  medium: '#f59e0b',
+  norm: '#0ea5e9',
+  long: '#f97316',
   hard: '#ef4444',
+  epic: '#d946ef',
 };
 
 // Custom marker icons by difficulty
-const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: boolean) => {
+const createMarkerIcon = (difficulty: Difficulty, isSelected: boolean) => {
   const color = difficultyColors[difficulty];
   const size = isSelected ? 40 : 32;
   const borderWidth = isSelected ? 4 : 2;

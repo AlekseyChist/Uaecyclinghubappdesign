@@ -3,17 +3,21 @@ import { MapContainer, TileLayer, Polyline, Marker, useMap } from 'react-leaflet
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+type Difficulty = 'easy' | 'norm' | 'long' | 'hard' | 'epic';
+
 interface MiniMapPreviewProps {
   route: [number, number][];
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: Difficulty;
   className?: string;
 }
 
 // Colors by difficulty
-const difficultyColors = {
+const difficultyColors: Record<Difficulty, string> = {
   easy: '#10b981',
-  medium: '#f59e0b',
+  norm: '#0ea5e9',
+  long: '#f97316',
   hard: '#ef4444',
+  epic: '#d946ef',
 };
 
 // Custom start marker

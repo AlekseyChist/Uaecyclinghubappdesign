@@ -152,16 +152,11 @@ function extractMetadata(gpxName, fileName) {
 
   const str = gpxName || fileName.replace('.gpx', '');
 
-  // Difficulty from · DIFFICULTY · pattern
+  // Difficulty from · DIFFICULTY · pattern — keep original values
   const diffMatch = str.match(/·\s*(EASY|NORM|LONG|HARD|EPIC)\s*·/i);
-  let difficulty = 'medium';
+  let difficulty = 'norm';
   if (diffMatch) {
-    const d = diffMatch[1].toUpperCase();
-    if (d === 'EASY') difficulty = 'easy';
-    else if (d === 'NORM') difficulty = 'medium';
-    else if (d === 'LONG') difficulty = 'medium';
-    else if (d === 'HARD') difficulty = 'hard';
-    else if (d === 'EPIC') difficulty = 'hard';
+    difficulty = diffMatch[1].toLowerCase();
   }
 
   // Estimated time from "ETA HH:MM" or "ETA HH H"
@@ -173,13 +168,37 @@ function extractMetadata(gpxName, fileName) {
     estimatedTime = mins > 0 ? `${hours}h ${String(mins).padStart(2, '0')}min` : `${hours}h 00min`;
   }
 
-  // Surface — all DBB routes are road
-  const surface = 'road';
+  // Surface — detect gravel from name patterns
+  const lowerStr = str.toLowerCase();
+  let surface = 'road';
+  if (lowerStr.includes('rocks') || lowerStr.includes('gravel')) {
+    surface = 'gravel';
+  }
+
+  // Route category from name patterns
+  let route_category = null;
+  if (lowerStr.includes('coffee') || lowerStr.match(/\bcr\b/)) {
+    route_category = 'coffee';
+  } else if (lowerStr.includes('dark') || lowerStr.includes('dod') || lowerStr.includes('dor')) {
+    route_category = 'dark';
+  } else if (lowerStr.includes('sun')) {
+    route_category = 'sun';
+  } else if (lowerStr.includes('plus') || lowerStr.match(/dbb\+/i)) {
+    route_category = 'plus';
+  } else if (lowerStr.includes('rekafary') || lowerStr.includes('burekfast')) {
+    route_category = 'misc';
+  }
+
+  // Route format — detect from name or default to loop
+  let route_format = 'loop';
+  if (lowerStr.includes('a to b') || lowerStr.includes('a→b')) {
+    route_format = 'point_to_point';
+  }
 
   // Clean display name: use the full GPX name (it's descriptive)
   const displayName = gpxName || fileName.replace('.gpx', '');
 
-  return { difficulty, surface, estimatedTime, displayName };
+  return { difficulty, surface, estimatedTime, displayName, route_category, route_format };
 }
 
 // ── Build safety notes from description & waypoints ──
@@ -231,7 +250,7 @@ async function seed() {
     const coordinates = startPoint; // center point = start
 
     // Extract metadata
-    const { difficulty, surface, estimatedTime, displayName } = extractMetadata(gpxName, fileName);
+    const { difficulty, surface, estimatedTime, displayName, route_category, route_format } = extractMetadata(gpxName, fileName);
     const safetyNotes = buildSafetyNotes(desc, waypoints);
 
     // Route points for map display (simplified)
@@ -248,6 +267,8 @@ async function seed() {
       elevation_m: elevation,
       difficulty,
       surface,
+      route_category,
+      route_format,
       thumbnail_url: null,
       coordinates,
       description: desc || null,

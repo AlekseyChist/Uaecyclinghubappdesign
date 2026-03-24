@@ -1,45 +1,87 @@
 import { supabase } from '../lib/supabase'
 
-type SupabaseTrackRow = {
+type RouteCatalogRow = {
   id: string
-  legacy_id: string | null
-  name: string
-  region: string
-  distance_km: number
-  elevation_m: number
-  difficulty: 'easy' | 'medium' | 'hard'
-  surface: 'road' | 'gravel' | 'mixed'
-  thumbnail_url: string | null
-  coordinates: { lat: number; lng: number } | null
-  description: string | null
-  safety_notes: string | null
-  estimated_time: string | null
-  photos: string[] | null
-  start_point: { lat: number; lng: number } | null
-  end_point: { lat: number; lng: number } | null
+  route: string
+  length_km: number | null
+  elev_gain_m: number | null
+  time_h: number | null
+  difficulty: string | null
+  surface: string | null
+  ride_family: string | null
+  route_type: string | null
+  place: string | null
+  about: string | null
   gpx_file_name: string | null
   route_points: Array<{ lat: number; lng: number }> | null
+  start_point: { lat: number; lng: number } | null
+  end_point: { lat: number; lng: number } | null
+  coordinates: { lat: number; lng: number } | null
+  thumbnail_url: string | null
+  photos: string[] | null
   is_published: boolean
   sort_order: number
   created_at: string
-  updated_at: string
 }
 
-function mapTrackRow(row: SupabaseTrackRow) {
+function normalizeDifficulty(raw: string | null): 'easy' | 'norm' | 'long' | 'hard' | 'epic' {
+  if (!raw) return 'norm'
+  const lower = raw.toLowerCase().trim()
+  if (lower === 'easy') return 'easy'
+  if (lower === 'norm') return 'norm'
+  if (lower === 'long') return 'long'
+  if (lower === 'hard') return 'hard'
+  if (lower === 'epic') return 'epic'
+  // Legacy mapping
+  if (lower === 'medium') return 'norm'
+  return 'norm'
+}
+
+function normalizeSurface(raw: string | null): 'road' | 'gravel' | 'mixed' {
+  if (!raw) return 'road'
+  const lower = raw.toLowerCase().trim()
+  if (lower === 'road') return 'road'
+  if (lower === 'gravel') return 'gravel'
+  if (lower === 'mixed') return 'mixed'
+  return 'road'
+}
+
+function normalizeRideFamily(raw: string | null): 'coffee' | 'dark' | 'sun' | 'plus' | 'misc' | null {
+  if (!raw) return null
+  const lower = raw.toLowerCase().trim()
+  if (lower === 'coffee') return 'coffee'
+  if (lower === 'dark') return 'dark'
+  if (lower === 'sun') return 'sun'
+  if (lower === 'plus') return 'plus'
+  if (lower === 'misc') return 'misc'
+  return null
+}
+
+function normalizeRouteType(raw: string | null): 'loop' | 'point_to_point' | null {
+  if (!raw) return null
+  const lower = raw.toLowerCase().trim()
+  if (lower.includes('loop')) return 'loop'
+  if (lower.includes('a to b') || lower.includes('a→b') || lower.includes('↦')) return 'point_to_point'
+  return null
+}
+
+function mapCatalogRow(row: RouteCatalogRow) {
   return {
     uuid: row.id,
-    id: row.legacy_id ?? row.id,
-    name: row.name,
-    region: row.region,
-    distance: row.distance_km,
-    elevation: row.elevation_m,
-    difficulty: row.difficulty,
-    surface: row.surface,
+    id: row.id,
+    name: row.route,
+    region: row.place || 'Serbia',
+    distance: Number(row.length_km) || 0,
+    elevation: row.elev_gain_m || 0,
+    difficulty: normalizeDifficulty(row.difficulty),
+    surface: normalizeSurface(row.surface),
+    rideFamily: normalizeRideFamily(row.ride_family),
+    routeType: normalizeRouteType(row.route_type),
     thumbnail: row.thumbnail_url ?? '',
     coordinates: row.coordinates,
-    description: row.description,
-    safetyNotes: row.safety_notes,
-    estimatedTime: row.estimated_time,
+    description: row.about,
+    safetyNotes: null as string | null,
+    estimatedTime: row.time_h ? `${row.time_h}h` : null,
     photos: row.photos ?? [],
     startPoint: row.start_point,
     endPoint: row.end_point,
@@ -48,43 +90,37 @@ function mapTrackRow(row: SupabaseTrackRow) {
     isPublished: row.is_published,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    updatedAt: row.created_at,
   }
 }
 
 export const trackService = {
-  async getTracks(region?: string) {
-    let query = supabase
-      .from('tracks')
+  async getTracks(_region?: string) {
+    const { data, error } = await supabase
+      .from('routes_catalog')
       .select('*')
       .eq('is_published', true)
       .order('sort_order', { ascending: true })
-
-    if (region) {
-      query = query.eq('region', region)
-    }
-
-    const { data, error } = await query
 
     if (error) {
       throw error
     }
 
-    return (data ?? []).map((row) => mapTrackRow(row as SupabaseTrackRow))
+    return (data ?? []).map((row) => mapCatalogRow(row as RouteCatalogRow))
   },
 
-  async getTrackDetail(legacyId: string) {
+  async getTrackDetail(trackId: string) {
     const { data, error } = await supabase
-      .from('tracks')
+      .from('routes_catalog')
       .select('*')
-      .eq('legacy_id', legacyId)
+      .eq('id', trackId)
       .single()
 
     if (error) {
       throw error
     }
 
-    return mapTrackRow(data as SupabaseTrackRow)
+    return mapCatalogRow(data as RouteCatalogRow)
   },
 
   getGpxDownloadUrl(fileName: string) {

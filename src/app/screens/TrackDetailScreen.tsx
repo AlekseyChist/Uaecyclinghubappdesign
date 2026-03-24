@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Heart, Share2, Download, Navigation, MapPin, Clock, TrendingUp, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Download, Navigation, MapPin, Clock, TrendingUp, AlertTriangle, Image as ImageIcon, RotateCw, ArrowRight } from 'lucide-react';
 import { Chip } from '@/app/components/design-system/Chip';
 import { MiniMapPreview } from '@/app/components/map/MiniMapPreview';
 import { trackService } from '@/services/trackService';
@@ -160,13 +160,27 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
             <MapPin className="w-4 h-4" />
             <span>{track.region}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Chip variant={track.difficulty}>
               {track.difficulty.charAt(0).toUpperCase() + track.difficulty.slice(1)}
             </Chip>
             <Chip variant={track.surface}>
               {track.surface.charAt(0).toUpperCase() + track.surface.slice(1)}
             </Chip>
+            {track.rideFamily && (
+              <Chip variant={track.rideFamily}>
+                {track.rideFamily.charAt(0).toUpperCase() + track.rideFamily.slice(1)}
+              </Chip>
+            )}
+            {track.routeType && (
+              <span className="inline-flex items-center gap-1 text-sm text-gray-500">
+                {track.routeType === 'loop' ? (
+                  <><RotateCw className="w-3.5 h-3.5" /> Loop</>
+                ) : (
+                  <><ArrowRight className="w-3.5 h-3.5" /> A → B</>
+                )}
+              </span>
+            )}
           </div>
         </div>
 

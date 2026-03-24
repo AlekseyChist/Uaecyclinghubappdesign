@@ -1,19 +1,23 @@
 import React from 'react';
 import { MapPin as MapPinIcon } from 'lucide-react';
 
+type Difficulty = 'easy' | 'norm' | 'long' | 'hard' | 'epic';
+
 interface MapPinProps {
   selected?: boolean;
   onClick?: () => void;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: Difficulty;
 }
 
-const difficultyColors = {
+const difficultyColors: Record<Difficulty, string> = {
   easy: 'bg-emerald-500',
-  medium: 'bg-amber-500',
+  norm: 'bg-sky-500',
+  long: 'bg-orange-500',
   hard: 'bg-red-500',
+  epic: 'bg-fuchsia-500',
 };
 
-export function MapPin({ selected = false, onClick, difficulty = 'medium' }: MapPinProps) {
+export function MapPin({ selected = false, onClick, difficulty = 'norm' }: MapPinProps) {
   return (
     <button
       onClick={onClick}

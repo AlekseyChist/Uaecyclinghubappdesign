@@ -14,16 +14,49 @@ interface TracksScreenProps {
   onFavoriteToggle: (trackId: string) => void;
 }
 
+type DifficultyFilter = 'easy' | 'norm' | 'long' | 'hard' | 'epic';
+type SurfaceFilter = 'road' | 'gravel' | 'mixed';
+type RideFamilyFilter = 'coffee' | 'dark' | 'sun' | 'plus' | 'misc';
+type RouteTypeFilter = 'loop' | 'point_to_point';
+
+const difficultyOptions: { value: DifficultyFilter; label: string }[] = [
+  { value: 'easy', label: 'Easy' },
+  { value: 'norm', label: 'Norm' },
+  { value: 'long', label: 'Long' },
+  { value: 'hard', label: 'Hard' },
+  { value: 'epic', label: 'Epic' },
+];
+
+const surfaceOptions: { value: SurfaceFilter; label: string }[] = [
+  { value: 'road', label: 'Road' },
+  { value: 'gravel', label: 'Gravel' },
+  { value: 'mixed', label: 'Mixed' },
+];
+
+const familyOptions: { value: RideFamilyFilter; label: string }[] = [
+  { value: 'coffee', label: 'Coffee' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'sun', label: 'Sun' },
+  { value: 'plus', label: 'Plus' },
+  { value: 'misc', label: 'Misc' },
+];
+
+const formatOptions: { value: RouteTypeFilter; label: string }[] = [
+  { value: 'loop', label: 'Loop ↺' },
+  { value: 'point_to_point', label: 'A → B' },
+];
+
 export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sheetState, setSheetState] = useState<BottomSheetState>('collapsed');
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const [filters, setFilters] = useState({
-    difficulty: null as 'easy' | 'medium' | 'hard' | null,
-    surface: null as 'road' | 'gravel' | 'mixed' | null,
-    region: null as string | null,
+    difficulty: null as DifficultyFilter | null,
+    surface: null as SurfaceFilter | null,
+    rideFamily: null as RideFamilyFilter | null,
+    routeType: null as RouteTypeFilter | null,
     showFavorites: false,
   });
 
@@ -32,10 +65,11 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
                          track.region.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDifficulty = !filters.difficulty || track.difficulty === filters.difficulty;
     const matchesSurface = !filters.surface || track.surface === filters.surface;
-    const matchesRegion = !filters.region || track.region === filters.region;
+    const matchesFamily = !filters.rideFamily || track.rideFamily === filters.rideFamily;
+    const matchesType = !filters.routeType || track.routeType === filters.routeType;
     const matchesFavorites = !filters.showFavorites || track.isFavorite;
-    
-    return matchesSearch && matchesDifficulty && matchesSurface && matchesRegion && matchesFavorites;
+
+    return matchesSearch && matchesDifficulty && matchesSurface && matchesFamily && matchesType && matchesFavorites;
   });
 
   const handlePinClick = (trackId: string) => {
@@ -50,7 +84,8 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const activeFiltersCount = [
     filters.difficulty,
     filters.surface,
-    filters.region,
+    filters.rideFamily,
+    filters.routeType,
     filters.showFavorites,
   ].filter(Boolean).length;
 
@@ -85,38 +120,79 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           {/* Filter Chips */}
           {showFilters && (
             <div className="mt-3 space-y-2">
+              {/* Difficulty */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-gray-500">Difficulty:</span>
-                {(['easy', 'medium', 'hard'] as const).map((diff) => (
+                <span className="text-xs text-gray-500 w-14 flex-shrink-0">Difficulty:</span>
+                {difficultyOptions.map((opt) => (
                   <button
-                    key={diff}
-                    onClick={() => setFilters({ ...filters, difficulty: filters.difficulty === diff ? null : diff })}
+                    key={opt.value}
+                    onClick={() => setFilters({ ...filters, difficulty: filters.difficulty === opt.value ? null : opt.value })}
                   >
                     <Chip
-                      variant={diff}
-                      className={filters.difficulty === diff ? 'ring-2 ring-offset-2 ring-primary' : 'opacity-60'}
+                      variant={opt.value}
+                      className={filters.difficulty === opt.value ? 'ring-2 ring-offset-1 ring-primary' : 'opacity-60'}
                     >
-                      {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                      {opt.label}
                     </Chip>
                   </button>
                 ))}
               </div>
+
+              {/* Surface */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-gray-500">Surface:</span>
-                {(['road', 'gravel', 'mixed'] as const).map((surf) => (
+                <span className="text-xs text-gray-500 w-14 flex-shrink-0">Surface:</span>
+                {surfaceOptions.map((opt) => (
                   <button
-                    key={surf}
-                    onClick={() => setFilters({ ...filters, surface: filters.surface === surf ? null : surf })}
+                    key={opt.value}
+                    onClick={() => setFilters({ ...filters, surface: filters.surface === opt.value ? null : opt.value })}
                   >
                     <Chip
-                      variant={surf}
-                      className={filters.surface === surf ? 'ring-2 ring-offset-2 ring-primary' : 'opacity-60'}
+                      variant={opt.value}
+                      className={filters.surface === opt.value ? 'ring-2 ring-offset-1 ring-primary' : 'opacity-60'}
                     >
-                      {surf.charAt(0).toUpperCase() + surf.slice(1)}
+                      {opt.label}
                     </Chip>
                   </button>
                 ))}
               </div>
+
+              {/* DBB Ride Family */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-gray-500 w-14 flex-shrink-0">DBB Ride:</span>
+                {familyOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setFilters({ ...filters, rideFamily: filters.rideFamily === opt.value ? null : opt.value })}
+                  >
+                    <Chip
+                      variant={opt.value}
+                      className={filters.rideFamily === opt.value ? 'ring-2 ring-offset-1 ring-primary' : 'opacity-60'}
+                    >
+                      {opt.label}
+                    </Chip>
+                  </button>
+                ))}
+              </div>
+
+              {/* Route Type */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-gray-500 w-14 flex-shrink-0">Format:</span>
+                {formatOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setFilters({ ...filters, routeType: filters.routeType === opt.value ? null : opt.value })}
+                  >
+                    <Chip
+                      variant={opt.value}
+                      className={filters.routeType === opt.value ? 'ring-2 ring-offset-1 ring-primary' : 'opacity-60'}
+                    >
+                      {opt.label}
+                    </Chip>
+                  </button>
+                ))}
+              </div>
+
+              {/* Favorites + Clear */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setFilters({ ...filters, showFavorites: !filters.showFavorites })}
@@ -130,7 +206,13 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
                 </button>
                 {activeFiltersCount > 0 && (
                   <button
-                    onClick={() => setFilters({ difficulty: null, surface: null, region: null, showFavorites: false })}
+                    onClick={() => setFilters({
+                      difficulty: null,
+                      surface: null,
+                      rideFamily: null,
+                      routeType: null,
+                      showFavorites: false,
+                    })}
                     className="text-sm text-primary hover:underline"
                   >
                     Clear all
