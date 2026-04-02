@@ -9,9 +9,9 @@ import { ShopDetailScreen } from '@/app/screens/ShopDetailScreen';
 import { RegulationsScreen } from '@/app/screens/RegulationsScreen';
 import { EventsScreen } from '@/app/screens/EventsScreen';
 import { EventDetailScreen } from '@/app/screens/EventDetailScreen';
+import { useClubEvents } from '@/hooks/useClubEvents';
 import {
   mockTracks,
-  mockEvents,
   mockShops,
   mockRegulations,
   mockTrackDetails,
@@ -35,7 +35,7 @@ export default function App() {
   const [tracks, setTracks] = useState<Track[]>(
     mockTracks.filter(track => track.region === CLUB_REGION)
   );
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const { clubEvents, isLoading: isLoadingClubEvents, error: clubEventsError, refetch: refetchClubEvents } = useClubEvents();
   const [shops] = useState<Shop[]>(mockShops);
 
   const handleOnboardingComplete = () => {
@@ -81,17 +81,8 @@ export default function App() {
     );
   };
 
-  const handleEventSaveToggle = (eventId: string) => {
-    setEvents((prevEvents) =>
-      prevEvents.map((event) => {
-        if (event.id === eventId) {
-          const isSaved = !event.isSaved;
-          toast.success(isSaved ? 'Event saved' : 'Event removed');
-          return { ...event, isSaved };
-        }
-        return event;
-      })
-    );
+  const handleEventSaveToggle = (_eventId: string) => {
+    toast.success('Event saved');
   };
 
   // Render onboarding
@@ -130,8 +121,8 @@ export default function App() {
 
   // Render event detail
   if (currentScreen.type === 'event-detail') {
-    const event = events.find((e) => e.id === currentScreen.eventId);
-    
+    const event = (clubEvents as Event[]).find((e) => e.id === currentScreen.eventId);
+
     if (!event) {
       return <div>Event not found</div>;
     }
@@ -167,7 +158,13 @@ export default function App() {
           <RegulationsScreen regulations={mockRegulations} />
         )}
         {activeTab === 'events' && (
-          <EventsScreen events={events} onEventClick={handleEventClick} />
+          <EventsScreen
+            events={clubEvents as Event[]}
+            isLoadingEvents={isLoadingClubEvents}
+            eventsError={clubEventsError}
+            onEventClick={handleEventClick}
+            onRefreshEvents={refetchClubEvents}
+          />
         )}
       </div>
 

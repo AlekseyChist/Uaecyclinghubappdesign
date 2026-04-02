@@ -12,6 +12,12 @@ export interface Event {
   distanceOptions?: string[];
   status: 'upcoming' | 'sold-out' | 'canceled';
   isSaved?: boolean;
+  // Strava-specific fields
+  description?: string;
+  organizer?: string;
+  activityType?: string;
+  stravaEventId?: number;
+  isFromStrava?: boolean;
 }
 
 interface EventCardProps {

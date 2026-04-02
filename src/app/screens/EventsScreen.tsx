@@ -2,18 +2,28 @@ import React, { useState } from 'react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { EventCard, Event } from '@/app/components/cards/EventCard';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
-import { Calendar } from 'lucide-react';
+import { Calendar, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface EventsScreenProps {
   events: Event[];
+  isLoadingEvents: boolean;
+  eventsError: string | null;
   onEventClick: (eventId: string) => void;
+  onRefreshEvents: () => void;
 }
 
-export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
+export function EventsScreen({
+  events,
+  isLoadingEvents,
+  eventsError,
+  onEventClick,
+  onRefreshEvents,
+}: EventsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'this-month'>('upcoming');
 
   const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
 
@@ -23,17 +33,18 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
         event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.location.toLowerCase().includes(searchQuery.toLowerCase());
 
+      // Compare date strings to avoid timezone issues
       const eventDate = new Date(event.date);
       const matchesFilter =
         filterType === 'all' ||
-        (filterType === 'upcoming' && eventDate >= now) ||
+        (filterType === 'upcoming' && event.date >= todayStr) ||
         (filterType === 'this-month' &&
           eventDate.getMonth() === thisMonth &&
           eventDate.getFullYear() === thisYear);
 
       return matchesSearch && matchesFilter;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // Group events by month
   const groupedEvents = filteredEvents.reduce((acc, event) => {
@@ -55,7 +66,16 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
-          <h1 className="text-2xl mb-4">Events</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl">Events</h1>
+            <button
+              onClick={onRefreshEvents}
+              className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              title="Refresh events"
+            >
+              <RefreshCw className={`w-4 h-4 text-gray-600 ${isLoadingEvents ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
 
           {/* Filter Chips */}
           <div className="flex gap-2 mb-4">
@@ -88,7 +108,49 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
 
       {/* Content */}
       <div className="p-4">
-        {filteredEvents.length === 0 ? (
+        {/* Loading state */}
+        {isLoadingEvents && events.length === 0 && (
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl mb-4">
+            <RefreshCw className="w-5 h-5 text-[#FC4C02] animate-spin flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-gray-700">Loading events from Strava...</p>
+              <p className="text-xs text-gray-500">Fetching latest DBB club events</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {eventsError && (
+          <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl mb-4">
+            <AlertCircle className="w-5 h-5 text-[#FC4C02] flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-gray-700">
+                Showing scheduled club events
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Live sync with Strava is temporarily unavailable.
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <a
+                  href="https://www.strava.com/clubs/dbb-"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-[#FC4C02] underline"
+                >
+                  Open DBB Club on Strava
+                </a>
+                <button
+                  onClick={onRefreshEvents}
+                  className="text-xs font-medium text-gray-500 underline"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {filteredEvents.length === 0 && !isLoadingEvents ? (
           <EmptyState
             icon={Calendar}
             title="No events found"
@@ -98,7 +160,7 @@ export function EventsScreen({ events, onEventClick }: EventsScreenProps) {
           <div className="space-y-6">
             {Object.entries(groupedEvents).map(([monthYear, monthEvents]) => (
               <div key={monthYear}>
-                <div className="sticky top-[180px] bg-white py-2 mb-3 border-b border-gray-100">
+                <div className="sticky top-[220px] bg-white py-2 mb-3 border-b border-gray-100">
                   <h3 className="text-sm text-gray-500">{monthYear}</h3>
                 </div>
                 <div className="space-y-3">
