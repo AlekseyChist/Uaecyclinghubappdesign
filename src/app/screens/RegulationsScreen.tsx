@@ -1,34 +1,7 @@
 import React, { useState } from 'react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
-import { ChevronDown, Bookmark, BookOpen, ExternalLink } from 'lucide-react';
-
-const LAW_URL = 'https://www.paragraf.rs/propisi/zakon_o_bezbednosti_saobracaja_na_putevima.html';
-
-function renderContentWithLawRefs(content: string) {
-  // Match law provisions like "Art. 187 p. 3 of the Law" or "No provision of the Law"
-  const lawRefPattern = /((?:Art\.\s*\d+\s*p\.\s*\d+\s*of\s*the\s*Law)|(?:No\s*provision\s*of\s*the\s*Law))/;
-  const parts = content.split(lawRefPattern);
-
-  return parts.map((part, index) => {
-    if (lawRefPattern.test(part)) {
-      return (
-        <a
-          key={index}
-          href={LAW_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-400 italic inline-flex items-center gap-1 hover:text-gray-500 transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {part}
-          <ExternalLink className="w-3 h-3 inline-block" />
-        </a>
-      );
-    }
-    return <span key={index}>{part}</span>;
-  });
-}
+import { ChevronDown, Bookmark, BookOpen } from 'lucide-react';
 
 interface RegulationItem {
   id: string;
@@ -88,10 +61,11 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
+          <h1 className="text-2xl mb-4">Regulations & Safety</h1>
           <SearchField
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search the rules"
+            placeholder="Search rules and guidelines"
           />
         </div>
       </div>
@@ -150,8 +124,8 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
 
                         {isExpanded && (
                           <div className="px-4 pb-4 pt-1">
-                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                              {renderContentWithLawRefs(item.content)}
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              {item.content}
                             </p>
                           </div>
                         )}
@@ -167,7 +141,7 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
         {/* Info Footer */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-4">
           <p className="text-xs text-blue-900 leading-relaxed">
-            <strong>Note:</strong> &lsquo;The Law&rsquo; refers to the <a href={LAW_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Law On Road Traffic Safety</a> with amendments up to 2025. A new traffic law is being developed in Serbia at the time of publishing, and we have communicated our concerns regarding the &lsquo;Other Traffic Rules&rsquo; to the relevant authority. Always check the current law. When in doubt, prioritise safety.
+            <strong>Important:</strong> These guidelines are for general reference. Always check local regulations and road conditions before your ride. When in doubt, prioritize safety.
           </p>
         </div>
       </div>

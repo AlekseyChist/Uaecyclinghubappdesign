@@ -9,7 +9,7 @@ interface MapPinProps {
 
 const difficultyColors = {
   easy: 'bg-emerald-500',
-  medium: 'bg-blue-500',
+  medium: 'bg-amber-500',
   hard: 'bg-red-500',
 };
 

@@ -4,26 +4,27 @@ import { ShopCard, Shop } from '@/app/components/cards/ShopCard';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
 import { Store } from 'lucide-react';
 
-type ShopTab = 'shops' | 'services' | 'friends';
-
 interface ShopsScreenProps {
   shops: Shop[];
+  onShopClick: (shopId: string) => void;
 }
 
-export function ShopsScreen({ shops }: ShopsScreenProps) {
+export function ShopsScreen({ shops, onShopClick }: ShopsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState<ShopTab>('shops');
+  const [selectedType, setSelectedType] = useState<'all' | 'shop' | 'sponsor'>('all');
 
   const filteredShops = shops.filter((shop) => {
-    const matchesTab = shop.tabs.includes(selectedTab);
-
     const matchesSearch =
-      searchQuery === '' ||
       shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       shop.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       shop.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesTab && matchesSearch;
+    const matchesType =
+      selectedType === 'all' ||
+      (selectedType === 'shop' && shop.category.toLowerCase().includes('shop')) ||
+      (selectedType === 'sponsor' && shop.category.toLowerCase().includes('sponsor'));
+
+    return matchesSearch && matchesType;
   });
 
   return (
@@ -31,19 +32,21 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
+          <h1 className="text-2xl mb-4">Shops & Sponsors</h1>
+          
           {/* Segmented Control */}
           <div className="flex bg-gray-100 rounded-2xl p-1 mb-4">
-            {(['shops', 'services', 'friends'] as const).map((tab) => (
+            {['all', 'shop', 'sponsor'].map((type) => (
               <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
+                key={type}
+                onClick={() => setSelectedType(type as typeof selectedType)}
                 className={`flex-1 py-2 rounded-xl font-medium transition-all ${
-                  selectedTab === tab
+                  selectedType === type
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600'
                 }`}
               >
-                {tab === 'shops' ? 'Shops' : tab === 'services' ? 'Services' : 'Friends'}
+                {type === 'all' ? 'All' : type === 'shop' ? 'Bike Shops' : 'Sponsors'}
               </button>
             ))}
           </div>
@@ -51,7 +54,7 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
           <SearchField
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search shops and services"
+            placeholder="Search shops and sponsors"
           />
         </div>
       </div>
@@ -67,7 +70,11 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
         ) : (
           <div className="space-y-3">
             {filteredShops.map((shop) => (
-              <ShopCard key={shop.id} shop={shop} />
+              <ShopCard
+                key={shop.id}
+                shop={shop}
+                onClick={() => onShopClick(shop.id)}
+              />
             ))}
           </div>
         )}
