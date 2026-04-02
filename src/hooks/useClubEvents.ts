@@ -91,8 +91,8 @@ function getFallbackClubEvents(): ClubEvent[] {
       };
     }),
   ]
-    .filter((e) => new Date(e.date) >= now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .filter((e) => e.date >= formatDate(now))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 interface UseClubEventsResult {

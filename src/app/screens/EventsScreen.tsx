@@ -28,6 +28,7 @@ export function EventsScreen({
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
 
@@ -47,17 +48,19 @@ export function EventsScreen({
         event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.location.toLowerCase().includes(searchQuery.toLowerCase());
 
+      // Compare date strings to avoid timezone issues
+      // event.date is already "YYYY-MM-DD" format
       const eventDate = new Date(event.date);
       const matchesFilter =
         filterType === 'all' ||
-        (filterType === 'upcoming' && eventDate >= now) ||
+        (filterType === 'upcoming' && event.date >= todayStr) ||
         (filterType === 'this-month' &&
           eventDate.getMonth() === thisMonth &&
           eventDate.getFullYear() === thisYear);
 
       return matchesSearch && matchesFilter;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // Group events by month
   const groupedEvents = filteredEvents.reduce((acc, event) => {

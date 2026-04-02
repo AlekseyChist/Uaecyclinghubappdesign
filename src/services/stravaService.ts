@@ -73,8 +73,13 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
   });
 
   // Each upcoming occurrence becomes a separate event entry
+  // Compare dates only (without time) to avoid timezone issues
+  const todayStr = now.toISOString().split('T')[0];
   const upcomingDates = (event.upcoming_occurrences || [])
-    .filter((dateStr) => new Date(dateStr) >= now)
+    .filter((dateStr) => {
+      const eventDateStr = new Date(dateStr).toISOString().split('T')[0];
+      return eventDateStr >= todayStr;
+    })
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
   // If no upcoming dates, show the event with the nearest future occurrence
