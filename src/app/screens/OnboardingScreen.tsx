@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bike, MapPin, Calendar } from 'lucide-react';
+import { Bike, MapPin, Info } from 'lucide-react';
 
 interface OnboardingScreenProps {
   onContinue: () => void;
@@ -12,12 +12,12 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
       <div className="flex-1 overflow-y-auto">
         <div className="min-h-full flex flex-col items-center justify-center px-6 text-center py-8">
           {/* Logo/Icon */}
-          <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-4 shadow-lg overflow-hidden">
-            <img src="/shops/dbb.png" alt="DBB Logo" className="w-full h-full object-cover" />
+          <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mb-4 shadow-lg">
+            <Bike className="w-12 h-12 text-white" />
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl mb-2">Cycling in Serbia</h1>
+          <h1 className="text-2xl mb-2">DBB</h1>
           <p className="text-gray-600 mb-8 max-w-sm leading-relaxed text-sm">
             Discover the best cycling tracks, connect with local shops, stay informed about regulations, and join exciting events.
           </p>
@@ -31,7 +31,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
               <div>
                 <h3 className="font-medium mb-0.5 text-sm">Explore Tracks</h3>
                 <p className="text-xs text-gray-600">
-                  Find popular cycling routes and events
+                  Find popular cycling routes with detailed maps and safety information
                 </p>
               </div>
             </div>
@@ -43,19 +43,19 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
               <div>
                 <h3 className="font-medium mb-0.5 text-sm">Local Shops</h3>
                 <p className="text-xs text-gray-600">
-                  Connect with bike shops and service places
+                  Connect with bike shops and sponsors in your area
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3 text-left">
               <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-emerald-600" />
+                <Info className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h3 className="font-medium mb-0.5 text-sm">Join Events</h3>
+                <h3 className="font-medium mb-0.5 text-sm">Stay Safe</h3>
                 <p className="text-xs text-gray-600">
-                  Stay informed about group rides and cycling events
+                  Access cycling regulations and safety guidelines
                 </p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           Get Started
         </button>
         <p className="text-xs text-gray-500 text-center">
-          By continuing, you agree to follow safe cycling practices
+          By continuing, you agree to follow safe cycling practices and traffic regulations
         </p>
       </div>
     </div>

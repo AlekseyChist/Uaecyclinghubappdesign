@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Toaster, toast } from 'sonner';
-import { BottomNav, TabType } from './components/navigation/BottomNav';
-import { OnboardingScreen } from './screens/OnboardingScreen';
-import { TracksScreen } from './screens/TracksScreen';
-import { TrackDetailScreen } from './screens/TrackDetailScreen';
-import { ShopsScreen } from './screens/ShopsScreen';
-import { RegulationsScreen } from './screens/RegulationsScreen';
-import { EventsScreen } from './screens/EventsScreen';
-import { EventDetailScreen } from './screens/EventDetailScreen';
+import { BottomNav, TabType } from '@/app/components/navigation/BottomNav';
+import { OnboardingScreen } from '@/app/screens/OnboardingScreen';
+import { TracksScreen } from '@/app/screens/TracksScreen';
+import { TrackDetailScreen } from '@/app/screens/TrackDetailScreen';
+import { ShopsScreen } from '@/app/screens/ShopsScreen';
+import { ShopDetailScreen } from '@/app/screens/ShopDetailScreen';
+import { RegulationsScreen } from '@/app/screens/RegulationsScreen';
+import { EventsScreen } from '@/app/screens/EventsScreen';
+import { EventDetailScreen } from '@/app/screens/EventDetailScreen';
 import {
+  mockTracks,
   mockEvents,
   mockShops,
   mockRegulations,
-} from '../data/mockData';
-
-import { useClubEvents } from '../hooks/useClubEvents';
-import { trackService } from '../services/trackService';
-import type { Track } from './components/cards/TrackCard';
-import type { Event } from './components/cards/EventCard';
+  mockTrackDetails,
+} from '@/data/mockData';
+import type { Track } from '@/app/components/cards/TrackCard';
+import type { Event } from '@/app/components/cards/EventCard';
+import type { Shop } from '@/app/components/cards/ShopCard';
 
 type Screen =
   | { type: 'onboarding' }
   | { type: 'main'; tab: TabType }
   | { type: 'track-detail'; trackId: string }
+  | { type: 'shop-detail'; shopId: string }
   | { type: 'event-detail'; eventId: string };
 
 // Club configuration - filter tracks by region
@@ -30,30 +32,11 @@ const CLUB_REGION = 'Serbia';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>({ type: 'onboarding' });
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [isLoadingTracks, setIsLoadingTracks] = useState(true);
-  const [tracksError, setTracksError] = useState<string | null>(null);
+  const [tracks, setTracks] = useState<Track[]>(
+    mockTracks.filter(track => track.region === CLUB_REGION)
+  );
   const [events, setEvents] = useState<Event[]>(mockEvents);
-  const { clubEvents, isLoading: isLoadingClubEvents, error: clubEventsError, refetch: refetchClubEvents } = useClubEvents();
-
-  useEffect(() => {
-    const loadTracks = async () => {
-      try {
-        setIsLoadingTracks(true);
-        setTracksError(null);
-
-        const supabaseTracks = await trackService.getTracks(CLUB_REGION);
-        setTracks(supabaseTracks as Track[]);
-      } catch (error) {
-        console.error('Failed to load tracks from Supabase:', error);
-        setTracksError('Failed to load tracks');
-      } finally {
-        setIsLoadingTracks(false);
-      }
-    };
-
-    loadTracks();
-  }, []);
+  const [shops] = useState<Shop[]>(mockShops);
 
   const handleOnboardingComplete = () => {
     setCurrentScreen({ type: 'main', tab: 'tracks' });
@@ -67,6 +50,10 @@ export default function App() {
     setCurrentScreen({ type: 'track-detail', trackId });
   };
 
+  const handleShopClick = (shopId: string) => {
+    setCurrentScreen({ type: 'shop-detail', shopId });
+  };
+
   const handleEventClick = (eventId: string) => {
     setCurrentScreen({ type: 'event-detail', eventId });
   };
@@ -74,6 +61,8 @@ export default function App() {
   const handleBack = () => {
     if (currentScreen.type === 'track-detail') {
       setCurrentScreen({ type: 'main', tab: 'tracks' });
+    } else if (currentScreen.type === 'shop-detail') {
+      setCurrentScreen({ type: 'main', tab: 'shops' });
     } else if (currentScreen.type === 'event-detail') {
       setCurrentScreen({ type: 'main', tab: 'events' });
     }
@@ -105,38 +94,44 @@ export default function App() {
     );
   };
 
+  // Render onboarding
   if (currentScreen.type === 'onboarding') {
     return <OnboardingScreen onContinue={handleOnboardingComplete} />;
   }
 
-  if (isLoadingTracks) {
-    return <div className="p-4">Loading tracks...</div>;
-  }
-
-  if (tracksError) {
-    return <div className="p-4">{tracksError}</div>;
-  }
-
+  // Render track detail
   if (currentScreen.type === 'track-detail') {
     const track = tracks.find((t) => t.id === currentScreen.trackId);
-
-    if (!track) {
+    const trackDetail = mockTrackDetails[currentScreen.trackId];
+    
+    if (!track || !trackDetail) {
       return <div>Track not found</div>;
     }
 
     return (
       <TrackDetailScreen
-        track={track}
+        track={{ ...trackDetail, isFavorite: track.isFavorite }}
         onBack={handleBack}
         onFavoriteToggle={() => handleFavoriteToggle(track.id)}
       />
     );
   }
 
-  if (currentScreen.type === 'event-detail') {
-    const event = events.find((e) => e.id === currentScreen.eventId)
-      || clubEvents.find((e) => e.id === currentScreen.eventId);
+  // Render shop detail
+  if (currentScreen.type === 'shop-detail') {
+    const shop = shops.find((s) => s.id === currentScreen.shopId);
+    
+    if (!shop) {
+      return <div>Shop not found</div>;
+    }
 
+    return <ShopDetailScreen shop={shop} onBack={handleBack} />;
+  }
+
+  // Render event detail
+  if (currentScreen.type === 'event-detail') {
+    const event = events.find((e) => e.id === currentScreen.eventId);
+    
     if (!event) {
       return <div>Event not found</div>;
     }
@@ -150,11 +145,13 @@ export default function App() {
     );
   }
 
+  // Render main app with tabs
   const activeTab = currentScreen.tab;
 
   return (
     <div className="h-screen flex flex-col bg-white max-w-md mx-auto">
       <Toaster position="top-center" richColors />
+      {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 'tracks' && (
           <TracksScreen
@@ -164,23 +161,17 @@ export default function App() {
           />
         )}
         {activeTab === 'shops' && (
-          <ShopsScreen shops={mockShops} />
+          <ShopsScreen shops={shops} onShopClick={handleShopClick} />
         )}
         {activeTab === 'regulations' && (
           <RegulationsScreen regulations={mockRegulations} />
         )}
         {activeTab === 'events' && (
-          <EventsScreen
-            events={events}
-            clubEvents={clubEvents as Event[]}
-            isLoadingClubEvents={isLoadingClubEvents}
-            clubEventsError={clubEventsError}
-            onEventClick={handleEventClick}
-            onRefreshClubEvents={refetchClubEvents}
-          />
+          <EventsScreen events={events} onEventClick={handleEventClick} />
         )}
       </div>
 
+      {/* Bottom Navigation */}
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );

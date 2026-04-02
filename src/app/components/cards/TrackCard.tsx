@@ -13,15 +13,6 @@ export interface Track {
   thumbnail: string;
   isFavorite?: boolean;
   coordinates?: { lat: number; lng: number };
-  // Detail fields (populated from Supabase)
-  description?: string;
-  safetyNotes?: string;
-  estimatedTime?: string;
-  photos?: string[];
-  startPoint?: { lat: number; lng: number };
-  endPoint?: { lat: number; lng: number };
-  gpxFileName?: string;
-  route?: Array<{ lat: number; lng: number }>;
 }
 
 interface TrackCardProps {

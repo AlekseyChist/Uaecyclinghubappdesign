@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/strava/:path*",
-      "destination": "/api/strava/:path*"
-    }
-  ]
-}
