@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { ArrowLeft, Heart, Share2, Download, Navigation, MapPin, Clock, TrendingUp, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { Chip } from '@/app/components/design-system/Chip';
 import { MiniMapPreview } from '@/app/components/map/MiniMapPreview';
-import type { TrackDetail } from '@/data/mockData';
-import { gpxRoutes, gpxToTrackMapping, getRouteForTrack } from '@/data/gpxRouteData';
+import { trackService } from '@/services/trackService';
+import type { Track } from '@/app/components/cards/TrackCard';
 
 interface TrackDetailScreenProps {
-  track: TrackDetail;
+  track: Track & { isFavorite?: boolean };
   onBack: () => void;
   onFavoriteToggle: () => void;
 }
@@ -24,17 +24,16 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
     }
   };
 
-  // Find GPX file for this track
-  const gpxKey = Object.entries(gpxToTrackMapping).find(([_, id]) => id === track.id)?.[0];
-  const gpxData = gpxKey ? gpxRoutes[gpxKey] : null;
+  // Route points for the mini map — from Supabase data
+  const routePoints: [number, number][] | null = track.route && track.route.length > 0
+    ? track.route.map(p => [p.lat, p.lng])
+    : null;
 
-  // Get route points for the mini map
-  const routePoints = getRouteForTrack(track.id);
-
-  // Get start point coordinates
-  const startPoint = gpxData?.startPoint || (routePoints && routePoints.length > 0
-    ? { lat: routePoints[0][0], lng: routePoints[0][1] }
-    : track.coordinates);
+  // Start point from Supabase data
+  const startPoint = track.startPoint
+    || (routePoints && routePoints.length > 0
+      ? { lat: routePoints[0][0], lng: routePoints[0][1] }
+      : track.coordinates);
 
   // Handle navigation to start point
   const handleNavigateToStart = () => {
@@ -51,42 +50,37 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
     let navigationUrl: string;
 
     if (isIOS) {
-      // Apple Maps URL for iOS
       navigationUrl = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
     } else if (isAndroid) {
-      // Google Maps URL for Android (opens in app if installed)
       navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     } else {
-      // Default to Google Maps for desktop/other
       navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     }
 
-    // Open navigation in a new tab/app
     window.open(navigationUrl, '_blank');
   };
 
   const handleDownloadGpx = async () => {
-    if (gpxData) {
-      try {
-        // Encode filename for URL (handles spaces and special chars)
-        const encodedFileName = encodeURIComponent(gpxData.fileName);
-        const response = await fetch(`/gpx/${encodedFileName}`);
+    if (!track.gpxFileName) return;
 
-        if (!response.ok) throw new Error('Download failed');
+    try {
+      const url = trackService.getGpxDownloadUrl(track.gpxFileName);
+      const response = await fetch(url);
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = gpxData.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('GPX download error:', error);
-        alert('Failed to download GPX file');
-      }
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = track.gpxFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('GPX download error:', error);
+      alert('Failed to download GPX file');
     }
   };
 
@@ -194,7 +188,7 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
               <Clock className="w-3 h-3" />
               Time
             </div>
-            <div className="font-semibold text-sm">{track.estimatedTime}</div>
+            <div className="font-semibold text-sm">{track.estimatedTime || '—'}</div>
           </div>
           <div className="bg-gray-50 rounded-2xl p-3 text-center">
             <div className="text-xs text-gray-500 mb-1">Difficulty</div>
@@ -203,21 +197,25 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         </div>
 
         {/* Description */}
-        <div>
-          <h3 className="mb-2">About this route</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{track.description}</p>
-        </div>
+        {track.description && (
+          <div>
+            <h3 className="mb-2">About this route</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">{track.description}</p>
+          </div>
+        )}
 
         {/* Safety Notes */}
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-amber-900 mb-1">Safety Notes</h4>
-              <p className="text-sm text-amber-800 leading-relaxed">{track.safetyNotes}</p>
+        {track.safetyNotes && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-amber-900 mb-1">Safety Notes</h4>
+                <p className="text-sm text-amber-800 leading-relaxed">{track.safetyNotes}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Mini Map Section */}
         <div>
@@ -243,15 +241,15 @@ export function TrackDetailScreen({ track, onBack, onFavoriteToggle }: TrackDeta
         <div className="space-y-3">
           <button
             onClick={handleDownloadGpx}
-            disabled={!gpxData}
+            disabled={!track.gpxFileName}
             className={`w-full py-4 rounded-2xl font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-              gpxData
+              track.gpxFileName
                 ? 'bg-primary text-white hover:bg-primary/90'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             <Download className="w-5 h-5" />
-            {gpxData ? 'Download GPX' : 'GPX Not Available'}
+            {track.gpxFileName ? 'Download GPX' : 'GPX Not Available'}
           </button>
           <button
             onClick={handleNavigateToStart}

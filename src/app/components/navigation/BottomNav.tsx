@@ -10,9 +10,9 @@ interface BottomNavProps {
 
 const tabs = [
   { id: 'tracks' as TabType, label: 'Tracks', icon: Map },
+  { id: 'events' as TabType, label: 'Events', icon: Calendar },
   { id: 'shops' as TabType, label: 'Shops', icon: Store },
   { id: 'regulations' as TabType, label: 'Rules', icon: BookOpen },
-  { id: 'events' as TabType, label: 'Events', icon: Calendar },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {

@@ -24,21 +24,44 @@ interface MapViewProps {
 
 // Colors by difficulty
 const difficultyColors = {
-  easy: '#10b981',
-  medium: '#f59e0b',
-  hard: '#ef4444',
+  easy: '#10b981',    // green
+  medium: '#3b82f6',  // blue
+  hard: '#ef4444',    // red
 };
 
-// Custom marker icons by difficulty
-const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: boolean) => {
+// Custom marker icons by difficulty with optional route count badge
+const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: boolean, routeCount?: number) => {
   const color = difficultyColors[difficulty];
   const size = isSelected ? 40 : 32;
   const borderWidth = isSelected ? 4 : 2;
+
+  const badgeHtml = routeCount && routeCount > 1 ? `
+    <div style="
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 20px;
+      height: 20px;
+      background-color: #ef4444;
+      border: 2px solid white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      padding: 0 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      line-height: 1;
+    ">${routeCount}</div>
+  ` : '';
 
   return L.divIcon({
     className: 'custom-marker',
     html: `
       <div style="
+        position: relative;
         width: ${size}px;
         height: ${size}px;
         background-color: ${color};
@@ -54,13 +77,68 @@ const createMarkerIcon = (difficulty: 'easy' | 'medium' | 'hard', isSelected: bo
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
         </svg>
+        ${badgeHtml}
       </div>
     `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size / 2],
+    iconSize: [size + 8, size + 8],
+    iconAnchor: [(size + 8) / 2, (size + 8) / 2],
+    popupAnchor: [0, -(size + 8) / 2],
   });
 };
+
+// Group tracks by proximity of start points (within ~200m)
+const PROXIMITY_THRESHOLD = 0.002; // ~200 meters in degrees
+
+interface MarkerGroup {
+  position: [number, number];
+  tracks: MapTrack[];
+  primaryDifficulty: 'easy' | 'medium' | 'hard';
+}
+
+function groupTracksByStartPoint(tracks: MapTrack[]): MarkerGroup[] {
+  const groups: MarkerGroup[] = [];
+
+  const getStartPosition = (track: MapTrack): [number, number] => {
+    if (track.route && track.route.length > 0) {
+      return track.route[0];
+    }
+    return [track.coordinates.lat, track.coordinates.lng];
+  };
+
+  for (const track of tracks) {
+    const pos = getStartPosition(track);
+    let addedToGroup = false;
+
+    for (const group of groups) {
+      const dlat = Math.abs(group.position[0] - pos[0]);
+      const dlng = Math.abs(group.position[1] - pos[1]);
+      if (dlat < PROXIMITY_THRESHOLD && dlng < PROXIMITY_THRESHOLD) {
+        group.tracks.push(track);
+        addedToGroup = true;
+        break;
+      }
+    }
+
+    if (!addedToGroup) {
+      groups.push({
+        position: pos,
+        tracks: [track],
+        primaryDifficulty: track.difficulty,
+      });
+    }
+  }
+
+  // Set primary difficulty to the hardest in the group
+  const difficultyRank = { easy: 0, medium: 1, hard: 2 };
+  for (const group of groups) {
+    group.primaryDifficulty = group.tracks.reduce((hardest, t) =>
+      difficultyRank[t.difficulty] > difficultyRank[hardest] ? t.difficulty : hardest,
+      group.tracks[0].difficulty
+    );
+  }
+
+  return groups;
+}
 
 // Component to handle map interactions
 function MapController({
@@ -103,13 +181,8 @@ export function MapView({
   zoom = 7,
   showRoutes = true
 }: MapViewProps) {
-  // Use route start point for marker position if available
-  const getMarkerPosition = (track: MapTrack): [number, number] => {
-    if (track.route && track.route.length > 0) {
-      return track.route[0];
-    }
-    return [track.coordinates.lat, track.coordinates.lng];
-  };
+  const markerGroups = groupTracksByStartPoint(tracks);
+
   return (
     <MapContainer
       center={center}
@@ -148,32 +221,84 @@ export function MapView({
         )
       ))}
 
-      {/* Render markers */}
-      {tracks.map((track) => (
-        <Marker
-          key={track.id}
-          position={getMarkerPosition(track)}
-          icon={createMarkerIcon(track.difficulty, selectedTrackId === track.id)}
-          eventHandlers={{
-            click: () => onTrackSelect?.(track.id),
-          }}
-        >
-          <Popup>
-            <div className="p-2 min-w-[140px]">
-              <h3 className="font-medium text-sm mb-1">{track.name}</h3>
-              <p className="text-xs text-gray-500 mb-2">{track.region}</p>
-              {onTrackOpen && (
-                <button
-                  onClick={() => onTrackOpen(track.id)}
-                  className="w-full bg-emerald-500 text-white text-xs py-1.5 px-3 rounded-lg font-medium hover:bg-emerald-600"
-                >
-                  View Details
-                </button>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      {/* Render grouped markers with count badges */}
+      {markerGroups.map((group, groupIdx) => {
+        const isGroupSelected = group.tracks.some(t => t.id === selectedTrackId);
+        const count = group.tracks.length;
+
+        return (
+          <Marker
+            key={`group-${groupIdx}`}
+            position={group.position}
+            icon={createMarkerIcon(group.primaryDifficulty, isGroupSelected, count)}
+            eventHandlers={{
+              click: () => {
+                // Select first track in group, or cycle through if already selected
+                if (count === 1) {
+                  onTrackSelect?.(group.tracks[0].id);
+                } else {
+                  const currentIdx = group.tracks.findIndex(t => t.id === selectedTrackId);
+                  const nextIdx = (currentIdx + 1) % count;
+                  onTrackSelect?.(group.tracks[nextIdx].id);
+                }
+              },
+            }}
+          >
+            <Popup>
+              <div className="p-2 min-w-[160px]">
+                {group.tracks.length === 1 ? (
+                  <>
+                    <h3 className="font-medium text-sm mb-1">{group.tracks[0].name}</h3>
+                    <p className="text-xs text-gray-500 mb-2">{group.tracks[0].region}</p>
+                    {onTrackOpen && (
+                      <button
+                        onClick={() => onTrackOpen(group.tracks[0].id)}
+                        className="w-full bg-emerald-500 text-white text-xs py-1.5 px-3 rounded-lg font-medium hover:bg-emerald-600"
+                      >
+                        View Details
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-medium text-sm mb-2">{count} routes from here</h3>
+                    <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                      {group.tracks.map(track => (
+                        <div
+                          key={track.id}
+                          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            onTrackSelect?.(track.id);
+                          }}
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: difficultyColors[track.difficulty] }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{track.name}</p>
+                          </div>
+                          {onTrackOpen && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onTrackOpen(track.id);
+                              }}
+                              className="text-emerald-500 text-xs font-medium flex-shrink-0"
+                            >
+                              Open
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }
