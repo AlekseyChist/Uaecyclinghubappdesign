@@ -136,6 +136,7 @@ export interface RegulationItem {
   id: string;
   title: string;
   content: string;
+  image?: string;
 }
 
 export interface RegulationCategory {
@@ -144,87 +145,126 @@ export interface RegulationCategory {
   items: RegulationItem[];
 }
 
+const RULES_IMG = '/DBB App \u00b7 Rules _ Pics';
+
 export const mockRegulations: RegulationCategory[] = [
   {
-    id: 'dbb-rules',
-    category: 'DBB Rules',
+    id: 'basic-rules',
+    category: 'Basic Rules',
     items: [
       {
-        id: 'dbb-1',
-        title: '1. Use a Proper bike',
-        content: 'Well, use whatever bike & gear, but if one crashes while riding an improper bike or without a properly fitting helmet, we will presume his or her sole responsibility \u2014 for both potential injuries and material damage \u2014 even if the crash was accidentally caused by another group member. There is a reason.',
+        id: 'basic-1',
+        title: '1. We ask you to wear a helmet',
+        content: 'In a group, not wearing a helmet puts extra liability on others in case the non-wearer gets a head injury \u2014 whether through one\u2019s own fault or somebody else\u2019s.\nThus, wearing a helmet is a matter of baseline respect for the others, even though you\u2019re not going to crash.',
       },
       {
-        id: 'dbb-2',
-        title: '2. Proper are Road & Gravel bikes',
-        content: 'Improper bikes for riding in a group are:\n\u2022 time-trial or triathlon bikes, or bikes with attached aerobars,\n\u2022 flat-bar or other bikes with wide handlebars,\n\u2022 fixed-gear bikes without at least a front brake,\n\u2022 bikes with potential or actual significant malfunctions.',
-      },
-      {
-        id: 'dbb-3',
-        title: '3. All your picture are belong to us',
-        content: 'People make photos & videos during our events and we will use them in any way your imaginary lawyer could imagine \u2014 but mostly in our Instagram \u2014 for which you grant us your irrevocable consent if you happen to be there. Club members have the right of access to all said images.',
-      },
-      {
-        id: 'dbb-4',
-        title: '4. You accept the Disclaimer',
-        content: 'All the rides are organised by Baranchikov & Partners Ltd, a legal entity that you can sue if anything makes you unhappy. Alexander Baranchikov, the sole proprietor of said entity, will do his best to make you happy, but accepts no personal legal responsibility for that.',
-      },
-      {
-        id: 'dbb-5',
-        title: '5. Obey the Rules',
-        content: 'If you come to our rides, you accept The Rules. And to enjoy any group ride you should also know the tips.',
+        id: 'basic-2',
+        title: '2. Come on a road or gravel bike',
+        content: 'The narrow handlebars let us ride closer to each other \u2014 two abreast and when overtaking. This leaves more space for maneuvers.\nMoreover, road bars don\u2019t tend to get caught on each other. And in case of a crash the rear-facing bar ends are less likely to cause injuries.\n\nPlease don\u2019t ride any of these in the group:\n\u2022 time-trial, triathlon bikes, or with clip-on bars\n\u2022 flat-bar or other bikes with wide handlebars\n\u2022 fixed-gear bikes without at least a front brake\n\u2022 bikes with malfunctions (e.g. a failed brake)',
       },
     ],
   },
   {
-    id: 'traffic-rules',
-    category: 'Traffic Rules to Obey',
+    id: 'traffic-laws',
+    category: 'Traffic Laws',
     items: [
       {
         id: 'traffic-1',
-        title: 'No drunk riding',
-        content: 'The acceptable blood alcohol limit for cyclists is 0.2 mg/ml (one beer should be just fine).\nArt. 187 p. 3 of the Law',
+        title: '3. No drunk riding',
+        content: 'The tolerated blood alcohol limit for cyclists in Serbia is 0.2 mg/ml.\nA beer should be fine, but two or more may put you in jail. The police do check cyclists, even if rarely. And they will certainly test in case of a traffic accident.',
       },
       {
         id: 'traffic-2',
-        title: 'Ride on the road',
-        content: 'A bicycle is a vehicle, same as a car. Thus, using pedestrian paths for cycling is forbidden.\nArt. 7 p. 32 of the Law',
+        title: '4. Use lights when appropriate',
+        content: 'A non-blinking white light at the front and a red one at the back must be attached to the bicycle and turned on when it\u2019s dark, foggy, or raining.\nPlease avoid brightly blinking rear lights in the group when there\u2019s no particular reason for those. In the daytime the group is clearly visible from behind.',
       },
       {
         id: 'traffic-3',
-        title: 'No earphones',
-        content: 'No riding with earphones in both ears. One earphone is okay (but impolite for a group ride).\nArt. 90 p. 7 of the Law',
+        title: '5. No stereo',
+        content: 'Riding with earphones in both ears is prohibited by law.\nIn the group, please don\u2019t listen to music at all, including through a single earphone, open-ear or bone-conducting headphones, or a portable speaker.\nYou should be able to hear the others, and they have the right not to share your music tastes, no matter how good they are.',
       },
       {
         id: 'traffic-4',
-        title: 'Bicycle lights',
-        content: 'Steady lights, white front and red back, shall be used during nighttime, fog, and/or rain.\nArt. 81 p. 5 of the Law',
+        title: '6. See the full traffic laws guide',
+        content: 'There is a comprehensive and constantly updated guide on the Serbian traffic laws by Bike Gremlin.',
       },
     ],
   },
   {
-    id: 'other-traffic',
-    category: 'Other Traffic Rules',
+    id: 'etiquette',
+    category: 'Etiquette',
     items: [
       {
-        id: 'other-1',
-        title: 'Helmet ignorance',
-        content: "A helmet on a bicycle is not required by law. According to us, not wearing one on a sporty bike suggests one didn\u2019t use that brain anyway.\nNo provision of the Law",
+        id: 'etiq-1',
+        title: '7. Don\u2019t overtake the pacer',
+        content: 'Some of our rides are paced by a ride leader. Please do not overtake him or her without a really good reason.',
       },
       {
-        id: 'other-2',
-        title: 'A meter rule',
-        content: "Cyclists should stay within one meter from the right side of the road \u2014 unless turning left, overtaking or avoiding an obstacle. Let\u2019s just say we avoid obstacles all the time.\nArt. 40 p. 1 of the Law",
+        id: 'etiq-2',
+        title: '8. Use hand signals',
+        content: 'Cycling etiquette assumes the riders in front of you show potholes & other stuff by hand gestures \u2014 and you pass those further on to people behind.\n\n\u2022 A pothole large enough to cause a flat tyre is shown by pointing down (or flicking the same-side elbow while keeping both hands on the bar).\n\u2022 Pointing to the side horizontally or upwards is a turn signal.\n\u2022 If there\u2019s a risk of collision (with a car, pedestrian, parking post, etc.), wave away from the danger with the hand behind your back.\n\u2022 Obstacles that we cannot go around (speed bumps or rail tracks) are shown by swinging either hand on your side (but not behind your back).',
+        image: `${RULES_IMG}/0-signs.png`,
       },
       {
-        id: 'other-3',
-        title: 'Always single',
-        content: 'In a group, cyclists are obliged to go one after another, not two abreast. For our safety, we tend to ride, legally, in two groups where, according to the law, one overtakes the other slowly but steadily.\nArt. 89 p. 4 of the Law',
+        id: 'etiq-3',
+        title: '9. Don\u2019t slow down without reason',
+        content: 'All your moves in the group should be smooth and predictable. Try to never brake or even stop pedaling. If you start coasting suddenly, that may slow you down enough to cause a disastrous chain reaction behind you.\nParticularly, there is no reason to coast after you see the sign for a speed bump or rail tracks \u2014 instead of trying to increase the space in front of you, try shifting to the side (see the checkerboard pattern tip below).',
       },
       {
-        id: 'other-4',
-        title: 'Mandatory paths',
-        content: "Cyclists are obliged to use a cycling path if there is one, in which case the road should not be used. Said paths are often in such poor state that we can\u2019t even recognise them \u2014 and hence keep on the road.\nArt. 89 p. 1 of the Law",
+        id: 'etiq-4',
+        title: '10. Be self-sufficient',
+        content: 'You should have all you may need in case of a puncture or mechanical failure: a spare tube and/or tyre plugs, a minipump or other inflating device, a multitool. You\u2019re supposed to know how to fix a flat tyre without resorting to others\u2019 help (even though we always help each other).\nOn longer rides, it makes sense to carry some carbs and a couple of bottles of water or electrolytes. It\u2019s also a good idea to have a charged-up phone with an internet connection and some emergency cash.',
+      },
+      {
+        id: 'etiq-5',
+        title: '11. Take and share pictures',
+        content: 'We encourage you to take photos & videos during our rides, provided that doesn\u2019t endanger you or others (particularly when riding with one or no hands on the bars \u2014 and please no long selfie sticks in the group).\nPlease share your photos & videos in DBB chats on Telegram, WhatsApp & Viber.\nBy doing so, you grant us your irrevocable consent to use them in any imaginable way (but mostly on our Instagram).\nBy coming to our events and riding with the group, you agree to be filmed, and you grant us your irrevocable consent to use images of you in any imaginable way. Thanks!',
+      },
+    ],
+  },
+  {
+    id: 'tips',
+    category: 'Tips',
+    items: [
+      {
+        id: 'tip-1',
+        title: '12. Distance to the rider in front',
+        content: 'The closer you are behind another rider, the easier it is for you to keep the pace, due to the lesser air resistance. The difference can be huge! Staying in the draft is the key to not struggling with the pace.\nThere is no need to be centimeters-close if you don\u2019t feel comfortable doing so. About half a meter is a good distance that is safe enough, but will also let you have most of the aero benefit.',
+        image: `${RULES_IMG}/1-distance.png`,
+      },
+      {
+        id: 'tip-2',
+        title: '13. Riding in a checkerboard pattern',
+        content: 'If the rider in front of you skips hand signals or you\u2019re not comfortable being right on their wheel for another reason, consider shifting to the outside of the group by about half a meter. There\u2019ll still be plenty of draft.\nThat way, you\u2019ll see obstacles farther in front of you, and the cyclist behind will also get some space in front of them for extra reaction time. Such spacing also works well before speed bumps and rail tracks.',
+        image: `${RULES_IMG}/2-shift.png`,
+      },
+      {
+        id: 'tip-3',
+        title: '14. Never overlap wheels',
+        content: 'It\u2019s important to not overlap your wheels with the rider in front. If it\u2019s them who has shifted outside, stay where you are relative to them to maintain the checkerboard order \u2014 don\u2019t squeeze them out!\nAlso, avoid riding three abreast: that doesn\u2019t allow the person in the middle to freely maneuver and avoid obstacles.\nWhen standing up on the pedals, be careful not to suddenly roll back your bike underneath you into the wheel of the cyclist behind. Show your intention by double-flicking both your elbows a few seconds before standing up, then shift your weight up smoothly.',
+        image: `${RULES_IMG}/3-overlap.png`,
+      },
+      {
+        id: 'tip-4',
+        title: '15. Catching up after a turn or a stop',
+        content: 'After a corner or a traffic light, the group will inevitably stretch. The ride leader should gain speed gradually, allowing each member of the group to catch up. Don\u2019t rush, but also don\u2019t hesitate.\nWhen catching up, imagine you are a boat that wants to \u201cmoor\u201d to the rider in front without much of a delay \u2014 but without brakes. Try to close the distance, but do it without sudden changes in speed.\nIf you happen to overshoot, try not to brake, but shift sideways more than half a meter. You will lose the draft, and the air will slow you down softly, so the rider in the back will not run into you.',
+        image: `${RULES_IMG}/4-overshoot.png`,
+      },
+      {
+        id: 'tip-5',
+        title: '16. Sidewind positioning',
+        content: 'If there is sidewind, it may be difficult to keep the pace, as the draft is compromised. First, it\u2019s easier to be in the line that is away from the wind. Also, you can try shifting a bit sideways from it if there\u2019s enough space on the road.',
+        image: `${RULES_IMG}/5-wind.png`,
+      },
+      {
+        id: 'tip-6',
+        title: '17. Don\u2019t get left behind accidentally',
+        content: 'If you have a puncture, or just cannot keep riding at the pace of the group, don\u2019t worry. Say loud and clear that you need to slow down or stop. As soon as this is passed on to the ride leader, he or she will do just that.\nSpecific to DBB rides \u2014 if everyone around is accelerating suddenly, don\u2019t feel that you must do that. We have certain segments where some people push hard, but then they wait for the rest. Live location is on the WhatsApp.',
+      },
+      {
+        id: 'tip-7',
+        title: '18. Use the best tyres you can',
+        content: 'Of all your bike components, tyres are by far the most important for maintaining speed in the group. Apart from that, we all benefit if one doesn\u2019t puncture all the time or crash in a slippery turn.\n\nRecommended gravel tyres:\n\u2022 Hutchinson Caracal RACE (avoid the model without the word race)\n\u2022 Tufo Thundero or Speedero (both are equally good, no need for HD)\n\nRecommended road tyres:\n\u2022 Pirelli P Zero Race RS (RS is also a distinctive part of the name)\n\u2022 Continental Grand Prix 5000 S TR\n\nImportantly, inflate your tyres to the optimal pressure, not the one indicated on the sidewall or advised to you anecdotally. We suggest using tyre pressure calculators from Silca or Wolftooth.',
       },
     ],
   },
