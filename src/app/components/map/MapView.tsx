@@ -24,9 +24,9 @@ interface MapViewProps {
 
 // Colors by difficulty
 const difficultyColors = {
-  easy: '#10b981',
-  medium: '#f59e0b',
-  hard: '#ef4444',
+  easy: '#10b981',    // green
+  medium: '#3b82f6',  // blue
+  hard: '#ef4444',    // red
 };
 
 // Custom marker icons by difficulty
