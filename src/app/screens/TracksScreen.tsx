@@ -177,7 +177,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           <h3 className="font-medium mb-1">
             {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''} found
           </h3>
-          <p className="text-sm text-gray-500">Tap a pin on the map to preview</p>
+          <p className="text-sm text-gray-500">Select a track to preview</p>
         </div>
 
         {filteredTracks.length === 0 ? (
