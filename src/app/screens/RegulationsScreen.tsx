@@ -34,6 +34,7 @@ interface RegulationItem {
   id: string;
   title: string;
   content: string;
+  image?: string;
 }
 
 interface RegulationCategory {
@@ -153,6 +154,13 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
                             <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
                               {renderContentWithLawRefs(item.content)}
                             </p>
+                            {item.image && (
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="mt-3 w-full rounded-xl"
+                              />
+                            )}
                           </div>
                         )}
                       </div>
