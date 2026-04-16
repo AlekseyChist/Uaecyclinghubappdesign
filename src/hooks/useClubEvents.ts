@@ -9,7 +9,7 @@ function getFallbackClubEvents(): ClubEvent[] {
   // Find the next occurrence of a given weekday (0=Sun, 1=Mon, ..., 6=Sat)
   const getNextWeekday = (weekday: number, weeksFromNow = 0): Date => {
     const date = new Date(now);
-    const diff = (weekday - date.getDay() + 7) % 7 || 7;
+    const diff = (weekday - date.getDay() + 7) % 7;
     date.setDate(date.getDate() + diff + weeksFromNow * 7);
     return date;
   };
@@ -91,8 +91,8 @@ function getFallbackClubEvents(): ClubEvent[] {
       };
     }),
   ]
-    .filter((e) => new Date(e.date) >= now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .filter((e) => e.date >= formatDate(now))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 interface UseClubEventsResult {

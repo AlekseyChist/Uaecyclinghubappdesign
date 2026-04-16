@@ -21,6 +21,7 @@ export interface StravaGroupEvent {
   skill_levels: number; // 0=casual, 1=tempo, 2=hammerfest, 4=any
   terrain: number; // 0=road, 1=trail, 2=any
   upcoming_occurrences: string[]; // ISO date strings
+  zone: string; // e.g. "Europe/Belgrade"
   address: string;
   joined: boolean;
 }
@@ -73,38 +74,112 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
   });
 
   // Each upcoming occurrence becomes a separate event entry
-  const upcomingDates = (event.upcoming_occurrences || [])
-    .filter((dateStr) => new Date(dateStr) >= now)
+  // Compare date strings (YYYY-MM-DD) to avoid timezone issues filtering out near-future events
+  const todayStr = now.toISOString().split('T')[0];
+  const allOccurrences = event.upcoming_occurrences || [];
+  const upcomingDates = allOccurrences
+    .filter((dateStr) => {
+      const eventDateStr = new Date(dateStr).toISOString().split('T')[0];
+      const keep = eventDateStr >= todayStr;
+      if (!keep) {
+        console.log(`[Strava] Filtering out past occurrence: ${dateStr} (${eventDateStr} < ${todayStr})`);
+      }
+      return keep;
+    })
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-  // If no upcoming dates, show the event with the nearest future occurrence
-  // Some events may not have upcoming_occurrences populated — use created_at as fallback
+  console.log(`[Strava] "${event.title}": ${allOccurrences.length} total occurrences, ${upcomingDates.length} upcoming`, {
+    all: allOccurrences,
+    upcoming: upcomingDates,
+  });
+
+  // If no upcoming dates, handle recurring vs one-time events differently
   if (upcomingDates.length === 0) {
-    // Try to use the event even without upcoming dates
     const allDates = event.upcoming_occurrences || [];
-    if (allDates.length > 0) {
-      // Has dates but all in the past — skip
-      console.log(`[Strava] Skipping "${event.title}" — all ${allDates.length} occurrences are in the past`);
-      return [];
+
+    // Known recurring weekly events — generate future dates from their pattern
+    const RECURRING_EVENTS = [
+      'DBB Dark-On-Draft',
+      'DBB Coffee Ride',
+      'DBB Rekafary Ride',
+      'DBB Burekfast Club',
+    ];
+
+    const isRecurring = RECURRING_EVENTS.includes(event.title);
+
+    if (isRecurring && allDates.length > 0) {
+      const lastOccurrence = new Date(allDates[allDates.length - 1]);
+      const tz = event.zone || 'Europe/Belgrade';
+
+      // Extract local time parts in the event's timezone to avoid DST shifts.
+      // A stale winter date (UTC+1) would give wrong UTC hours for summer (UTC+2).
+      const localParts = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false,
+      }).formatToParts(lastOccurrence);
+
+      const localHour = Number(localParts.find(p => p.type === 'hour')?.value ?? 0);
+      const localMinute = Number(localParts.find(p => p.type === 'minute')?.value ?? 0);
+      const weekday = lastOccurrence.getUTCDay();
+
+      // Build next occurrence using local date math to respect DST
+      // Get today's date string in the event's timezone
+      const todayInTz = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(now);
+      const todayLocal = new Date(todayInTz + 'T00:00:00');
+      const todayWeekday = todayLocal.getDay();
+
+      const diff = (weekday - todayWeekday + 7) % 7;
+      const nextLocalDate = new Date(todayLocal);
+      nextLocalDate.setDate(nextLocalDate.getDate() + diff);
+
+      // Check if event time already passed today
+      if (diff === 0) {
+        const nowInTz = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz, hour: 'numeric', minute: 'numeric', hour12: false,
+        }).formatToParts(now);
+        const nowHour = Number(nowInTz.find(p => p.type === 'hour')?.value ?? 0);
+        const nowMinute = Number(nowInTz.find(p => p.type === 'minute')?.value ?? 0);
+        if (nowHour > localHour || (nowHour === localHour && nowMinute >= localMinute)) {
+          nextLocalDate.setDate(nextLocalDate.getDate() + 7);
+        }
+      }
+
+      // Generate only the nearest upcoming occurrence (matches Strava's 1-per-event behavior)
+      const generatedDates: string[] = [];
+      for (let i = 0; i < 1; i++) {
+        const d = new Date(nextLocalDate);
+        d.setDate(d.getDate() + i * 7);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(localHour).padStart(2, '0');
+        const min = String(localMinute).padStart(2, '0');
+        // Create a date string in the event's local time, then let the browser parse it
+        generatedDates.push(`${yyyy}-${mm}-${dd}T${hh}:${min}:00`);
+      }
+
+      console.log(`[Strava] "${event.title}": recurring event with stale dates, generated ${generatedDates.length} future dates (weekday=${weekday}, ${localHour}:${localMinute} ${tz})`);
+
+      return generatedDates.map((dateStr, index) => ({
+        id: `strava-${event.id}-gen-${index}`,
+        name: event.title,
+        date: dateStr.split('T')[0],
+        time: formatTime(dateStr),
+        location: event.address || 'See Strava for details',
+        type: mapSkillToType(event.skill_levels),
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: event.description,
+        organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
+        activityType: event.activity_type,
+        stravaEventId: event.id,
+        isFromStrava: true,
+      }));
     }
 
-    // No upcoming_occurrences at all — still show the event with created_at date
-    console.log(`[Strava] Event "${event.title}" has no upcoming_occurrences, using created_at`);
-    return [{
-      id: `strava-${event.id}`,
-      name: event.title,
-      date: new Date(event.created_at).toISOString().split('T')[0],
-      time: formatTime(event.created_at),
-      location: event.address || 'See Strava for details',
-      type: mapSkillToType(event.skill_levels),
-      status: 'upcoming' as const,
-      isSaved: false,
-      description: event.description,
-      organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
-      activityType: event.activity_type,
-      stravaEventId: event.id,
-      isFromStrava: true,
-    }];
+    // One-time past event or no dates at all — skip it
+    console.log(`[Strava] Skipping past event "${event.title}"`);
+    return [];
   }
 
   return upcomingDates.map((dateStr, index) => ({
