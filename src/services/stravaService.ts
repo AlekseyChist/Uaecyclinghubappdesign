@@ -92,13 +92,21 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
     upcoming: upcomingDates,
   });
 
-  // If no upcoming dates, try to generate future occurrences for recurring events
+  // If no upcoming dates, handle recurring vs one-time events differently
   if (upcomingDates.length === 0) {
     const allDates = event.upcoming_occurrences || [];
 
-    if (allDates.length > 0) {
-      // All occurrences are in the past — likely a recurring event with stale Strava data.
-      // Infer the weekday and time from the most recent occurrence and generate future dates.
+    // Known recurring weekly events — generate future dates from their pattern
+    const RECURRING_EVENTS = [
+      'DBB Dark-On-Draft',
+      'DBB Coffee Ride',
+      'DBB Rekafary Ride',
+      'DBB Burekfast Club',
+    ];
+
+    const isRecurring = RECURRING_EVENTS.includes(event.title);
+
+    if (isRecurring && allDates.length > 0) {
       const lastOccurrence = new Date(allDates[allDates.length - 1]);
       const weekday = lastOccurrence.getUTCDay();
       const hours = lastOccurrence.getUTCHours();
@@ -123,7 +131,7 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
         generatedDates.push(d);
       }
 
-      console.log(`[Strava] "${event.title}": all ${allDates.length} occurrences past, generated ${generatedDates.length} future dates from pattern (weekday=${weekday}, ${hours}:${minutes} UTC)`);
+      console.log(`[Strava] "${event.title}": recurring event with stale dates, generated ${generatedDates.length} future dates (weekday=${weekday}, ${hours}:${minutes} UTC)`);
 
       return generatedDates.map((d, index) => ({
         id: `strava-${event.id}-gen-${index}`,
@@ -142,26 +150,8 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
       }));
     }
 
-    // No upcoming_occurrences at all — still show the event with created_at date
-    if (event.created_at) {
-      console.log(`[Strava] Event "${event.title}" has no upcoming_occurrences, using created_at`);
-      return [{
-        id: `strava-${event.id}`,
-        name: event.title,
-        date: new Date(event.created_at).toISOString().split('T')[0],
-        time: formatTime(event.created_at),
-        location: event.address || 'See Strava for details',
-        type: mapSkillToType(event.skill_levels),
-        status: 'upcoming' as const,
-        isSaved: false,
-        description: event.description,
-        organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
-        activityType: event.activity_type,
-        stravaEventId: event.id,
-        isFromStrava: true,
-      }];
-    }
-
+    // One-time past event or no dates at all — skip it
+    console.log(`[Strava] Skipping past event "${event.title}"`);
     return [];
   }
 
