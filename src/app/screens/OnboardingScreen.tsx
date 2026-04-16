@@ -13,7 +13,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
         <div className="min-h-full flex flex-col items-center justify-center px-6 text-center py-8">
           {/* Logo/Icon */}
           <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-4 shadow-lg overflow-hidden">
-            <img src="/shops/dbb.png" alt="DBB Logo" className="w-full h-full object-cover" />
+            <img src="/DBB App · Shops _ Pics/DBB Logo.png" alt="DBB Logo" className="w-full h-full object-cover" />
           </div>
 
           {/* Title */}
