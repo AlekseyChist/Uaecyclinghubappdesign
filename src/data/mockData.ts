@@ -5,6 +5,8 @@ import type { Shop } from '@/app/components/cards/ShopCard';
 
 export const mockEvents: Event[] = [];
 
+const SHOPS_IMG = '/DBB App · Shops _ Pics';
+
 export const mockShops: Shop[] = [
   {
     id: 'planetbike',
@@ -14,7 +16,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade and more',
     link: 'https://planetbike.rs',
     linkLabel: 'planetbike.rs',
-    logo: '/shops/planetbike.jpg',
+    logo: `${SHOPS_IMG}/PlanetBike Logo.jpg`,
     tabs: ['shops'],
   },
   {
@@ -25,7 +27,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://probike.rs',
     linkLabel: 'probike.rs',
-    logo: '/shops/probike.jpg',
+    logo: `${SHOPS_IMG}/ProBike Logo.jpg`,
     tabs: ['shops'],
   },
   {
@@ -36,7 +38,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://sportofis.com',
     linkLabel: 'sportofis.com',
-    logo: '/shops/sportofis.png',
+    logo: `${SHOPS_IMG}/Sportofis Logo.png`,
     tabs: ['shops'],
   },
   {
@@ -47,7 +49,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://dropba.rs/rent',
     linkLabel: 'dropba.rs/rent',
-    logo: '/shops/dbb.png',
+    logo: `${SHOPS_IMG}/DBB Logo.png`,
     tabs: ['shops', 'services'],
   },
   {
@@ -58,7 +60,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'tel:+381641194005',
     linkLabel: '+381641194005',
-    logo: '/shops/mihail.png',
+    logo: `${SHOPS_IMG}/Mihail Photo.png`,
     tabs: ['services'],
     isPersonal: true,
   },
@@ -70,7 +72,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'tel:+381641557332',
     linkLabel: '+381641557332',
-    logo: '/shops/marko.png',
+    logo: `${SHOPS_IMG}/Marko Photo.png`,
     tabs: ['services'],
     isPersonal: true,
   },
@@ -82,7 +84,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://physioscience.ru/en',
     linkLabel: 'physioscience.ru/en',
-    logo: '/shops/denis.png',
+    logo: `${SHOPS_IMG}/Denis Photo.png`,
     tabs: ['services'],
     isPersonal: true,
   },
@@ -94,7 +96,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://dikidi.net/891836',
     linkLabel: 'dikidi.net/891836',
-    logo: '/shops/recoverypoint.jpg',
+    logo: `${SHOPS_IMG}/RecoveryPoint Logo.jpg`,
     tabs: ['services'],
   },
   {
@@ -105,7 +107,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://sonderbelgrade.com',
     linkLabel: 'sonderbelgrade.com',
-    logo: '/shops/Sonder Logo.png',
+    logo: `${SHOPS_IMG}/Sonder Logo.png`,
     tabs: ['friends'],
   },
   {
@@ -116,7 +118,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://dechkotzar.com',
     linkLabel: 'dechkotzar.com',
-    logo: '/shops/DechkoTzar Logo.png',
+    logo: `${SHOPS_IMG}/DechkoTzar Logo.png`,
     tabs: ['friends'],
   },
   {
@@ -127,7 +129,7 @@ export const mockShops: Shop[] = [
     location: 'Belgrade',
     link: 'https://chopchop.one/belgrade',
     linkLabel: 'chopchop.one/belgrade',
-    logo: '/shops/Chop-Chop Logo.png',
+    logo: `${SHOPS_IMG}/Chop-Chop Logo.png`,
     tabs: ['friends'],
   },
 ];
