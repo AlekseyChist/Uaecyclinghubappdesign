@@ -144,9 +144,9 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
         }
       }
 
-      // Generate 4 weekly occurrences as ISO strings with correct local time
+      // Generate only the nearest upcoming occurrence (matches Strava's 1-per-event behavior)
       const generatedDates: string[] = [];
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 1; i++) {
         const d = new Date(nextLocalDate);
         d.setDate(d.getDate() + i * 7);
         const yyyy = d.getFullYear();
