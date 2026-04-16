@@ -132,6 +132,11 @@ button,
   transform: translateZ(0) !important;
 }
 
+/* Content padding to clear the bottom nav + safe area */
+.content-safe-bottom {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* Track count overlay */
 .track-count-overlay {
   position: absolute !important;

@@ -12,10 +12,13 @@ interface BottomSheetProps {
 // Bottom nav is ~60px tall; sheet sits above it
 const BOTTOM_NAV_HEIGHT = 60;
 
+// Search bar is ~80px; full state must not go under it
+const SEARCH_BAR_HEIGHT = 80;
+
 const stateHeights: Record<BottomSheetState, string> = {
   collapsed: '120px',
   half: '50vh',
-  full: 'calc(100vh - 120px)',
+  full: `calc(100vh - ${BOTTOM_NAV_HEIGHT + SEARCH_BAR_HEIGHT}px)`,
 };
 
 export function BottomSheet({ children, state = 'collapsed', onStateChange }: BottomSheetProps) {
@@ -42,7 +45,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
     const deltaY = startY - clientY;
     const newHeight = currentHeight + deltaY;
 
-    if (newHeight >= 120 && newHeight <= window.innerHeight - 120) {
+    if (newHeight >= 120 && newHeight <= window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT) {
       setCurrentHeight(newHeight);
     }
   };
@@ -60,7 +63,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
       setCurrentHeight(window.innerHeight * 0.5);
     } else {
       newState = 'full';
-      setCurrentHeight(window.innerHeight - 120);
+      setCurrentHeight(window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT);
     }
 
     setCurrentState(newState);
