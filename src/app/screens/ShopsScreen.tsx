@@ -4,7 +4,7 @@ import { ShopCard, Shop } from '@/app/components/cards/ShopCard';
 import { EmptyState } from '@/app/components/design-system/EmptyState';
 import { Store } from 'lucide-react';
 
-type ShopTab = 'shops' | 'services' | 'friends';
+type ShopTab = 'all' | 'shops' | 'services' | 'friends';
 
 interface ShopsScreenProps {
   shops: Shop[];
@@ -12,10 +12,10 @@ interface ShopsScreenProps {
 
 export function ShopsScreen({ shops }: ShopsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState<ShopTab>('shops');
+  const [selectedTab, setSelectedTab] = useState<ShopTab>('all');
 
   const filteredShops = shops.filter((shop) => {
-    const matchesTab = shop.tabs.includes(selectedTab);
+    const matchesTab = selectedTab === 'all' || shop.tabs.includes(selectedTab);
 
     const matchesSearch =
       searchQuery === '' ||
@@ -33,17 +33,17 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
         <div className="p-4">
           {/* Segmented Control */}
           <div className="flex bg-gray-100 rounded-2xl p-1 mb-4">
-            {(['shops', 'services', 'friends'] as const).map((tab) => (
+            {(['all', 'shops', 'services', 'friends'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
-                className={`flex-1 py-2 rounded-xl font-medium transition-all ${
+                className={`flex-1 py-2 rounded-xl font-medium transition-all text-sm ${
                   selectedTab === tab
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600'
                 }`}
               >
-                {tab === 'shops' ? 'Shops' : tab === 'services' ? 'Services' : 'Friends'}
+                {tab === 'all' ? 'All' : tab === 'shops' ? 'Shops' : tab === 'services' ? 'Services' : 'Friends'}
               </button>
             ))}
           </div>
