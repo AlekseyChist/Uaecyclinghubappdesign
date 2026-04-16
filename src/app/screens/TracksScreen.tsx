@@ -20,22 +20,35 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   
+  type RideType = 'coffee' | 'dark' | 'sun' | 'plus' | 'misc';
+
   const [filters, setFilters] = useState({
     difficulty: null as 'easy' | 'medium' | 'hard' | null,
-    surface: null as 'road' | 'gravel' | 'mixed' | null,
+    surface: null as 'road' | 'gravel' | null,
+    rideType: null as RideType | null,
     region: null as string | null,
     showFavorites: false,
   });
+
+  const getRideType = (name: string): RideType => {
+    const n = name.toUpperCase();
+    if (n.includes('DBB CR') || n.includes('COFFEE')) return 'coffee';
+    if (n.includes('DBB DOD') || n.includes('DBB DOR') || n.includes('DARK')) return 'dark';
+    if (n.includes('DBB SUN')) return 'sun';
+    if (n.includes('DBB+')) return 'plus';
+    return 'misc';
+  };
 
   const filteredTracks = tracks.filter((track) => {
     const matchesSearch = track.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          track.region.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDifficulty = !filters.difficulty || track.difficulty === filters.difficulty;
     const matchesSurface = !filters.surface || track.surface === filters.surface;
+    const matchesRideType = !filters.rideType || getRideType(track.name) === filters.rideType;
     const matchesRegion = !filters.region || track.region === filters.region;
     const matchesFavorites = !filters.showFavorites || track.isFavorite;
-    
-    return matchesSearch && matchesDifficulty && matchesSurface && matchesRegion && matchesFavorites;
+
+    return matchesSearch && matchesDifficulty && matchesSurface && matchesRideType && matchesRegion && matchesFavorites;
   });
 
   const handlePinClick = (trackId: string) => {
@@ -50,6 +63,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const activeFiltersCount = [
     filters.difficulty,
     filters.surface,
+    filters.rideType,
     filters.region,
     filters.showFavorites,
   ].filter(Boolean).length;
@@ -103,7 +117,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-gray-500">Surface:</span>
-                {(['road', 'gravel', 'mixed'] as const).map((surf) => (
+                {(['road', 'gravel'] as const).map((surf) => (
                   <button
                     key={surf}
                     onClick={() => setFilters({ ...filters, surface: filters.surface === surf ? null : surf })}
@@ -114,6 +128,28 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
                     >
                       {surf.charAt(0).toUpperCase() + surf.slice(1)}
                     </Chip>
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-gray-500">Ride:</span>
+                {([
+                  ['coffee', 'Coffee'],
+                  ['dark', 'Dark'],
+                  ['sun', 'Sun'],
+                  ['plus', 'Plus'],
+                  ['misc', 'Misc'],
+                ] as const).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setFilters({ ...filters, rideType: filters.rideType === key ? null : key })}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                      filters.rideType === key
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-gray-700 border-gray-200 opacity-60'
+                    }`}
+                  >
+                    {label}
                   </button>
                 ))}
               </div>
@@ -130,7 +166,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
                 </button>
                 {activeFiltersCount > 0 && (
                   <button
-                    onClick={() => setFilters({ difficulty: null, surface: null, region: null, showFavorites: false })}
+                    onClick={() => setFilters({ difficulty: null, surface: null, rideType: null, region: null, showFavorites: false })}
                     className="text-sm text-primary hover:underline"
                   >
                     Clear all
