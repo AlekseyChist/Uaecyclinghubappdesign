@@ -27,7 +27,7 @@ export function ShopsScreen({ shops }: ShopsScreenProps) {
   });
 
   return (
-    <div className="h-full bg-white overflow-y-auto pb-20">
+    <div className="h-full bg-white overflow-y-auto content-safe-bottom">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="p-4">
