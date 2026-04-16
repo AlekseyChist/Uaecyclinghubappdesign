@@ -19,7 +19,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
           {/* Title */}
           <h1 className="text-2xl mb-2">Cycling in Serbia</h1>
           <p className="text-gray-600 mb-8 max-w-sm leading-relaxed text-sm">
-            Discover the best cycling tracks, connect with local shops, stay informed about regulations, and join exciting events.
+            Discover the best cycling tracks, connect with local shops, and join exciting events.
           </p>
 
           {/* Features */}
