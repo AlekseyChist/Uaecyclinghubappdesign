@@ -92,34 +92,77 @@ function mapStravaEventToClubEvent(event: StravaGroupEvent): ClubEvent[] {
     upcoming: upcomingDates,
   });
 
-  // If no upcoming dates, show the event with the nearest future occurrence
-  // Some events may not have upcoming_occurrences populated — use created_at as fallback
+  // If no upcoming dates, try to generate future occurrences for recurring events
   if (upcomingDates.length === 0) {
-    // Try to use the event even without upcoming dates
     const allDates = event.upcoming_occurrences || [];
+
     if (allDates.length > 0) {
-      // Has dates but all in the past — skip
-      console.log(`[Strava] Skipping "${event.title}" — all ${allDates.length} occurrences are in the past`);
-      return [];
+      // All occurrences are in the past — likely a recurring event with stale Strava data.
+      // Infer the weekday and time from the most recent occurrence and generate future dates.
+      const lastOccurrence = new Date(allDates[allDates.length - 1]);
+      const weekday = lastOccurrence.getUTCDay();
+      const hours = lastOccurrence.getUTCHours();
+      const minutes = lastOccurrence.getUTCMinutes();
+
+      // Find the next occurrence of this weekday from today
+      const nextDate = new Date(now);
+      const diff = (weekday - nextDate.getUTCDay() + 7) % 7;
+      nextDate.setUTCDate(nextDate.getUTCDate() + diff);
+      nextDate.setUTCHours(hours, minutes, 0, 0);
+
+      // If that time already passed today, move to next week
+      if (nextDate <= now) {
+        nextDate.setUTCDate(nextDate.getUTCDate() + 7);
+      }
+
+      // Generate 4 weekly occurrences
+      const generatedDates: Date[] = [];
+      for (let i = 0; i < 4; i++) {
+        const d = new Date(nextDate);
+        d.setUTCDate(d.getUTCDate() + i * 7);
+        generatedDates.push(d);
+      }
+
+      console.log(`[Strava] "${event.title}": all ${allDates.length} occurrences past, generated ${generatedDates.length} future dates from pattern (weekday=${weekday}, ${hours}:${minutes} UTC)`);
+
+      return generatedDates.map((d, index) => ({
+        id: `strava-${event.id}-gen-${index}`,
+        name: event.title,
+        date: d.toISOString().split('T')[0],
+        time: formatTime(d.toISOString()),
+        location: event.address || 'See Strava for details',
+        type: mapSkillToType(event.skill_levels),
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: event.description,
+        organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
+        activityType: event.activity_type,
+        stravaEventId: event.id,
+        isFromStrava: true,
+      }));
     }
 
     // No upcoming_occurrences at all — still show the event with created_at date
-    console.log(`[Strava] Event "${event.title}" has no upcoming_occurrences, using created_at`);
-    return [{
-      id: `strava-${event.id}`,
-      name: event.title,
-      date: new Date(event.created_at).toISOString().split('T')[0],
-      time: formatTime(event.created_at),
-      location: event.address || 'See Strava for details',
-      type: mapSkillToType(event.skill_levels),
-      status: 'upcoming' as const,
-      isSaved: false,
-      description: event.description,
-      organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
-      activityType: event.activity_type,
-      stravaEventId: event.id,
-      isFromStrava: true,
-    }];
+    if (event.created_at) {
+      console.log(`[Strava] Event "${event.title}" has no upcoming_occurrences, using created_at`);
+      return [{
+        id: `strava-${event.id}`,
+        name: event.title,
+        date: new Date(event.created_at).toISOString().split('T')[0],
+        time: formatTime(event.created_at),
+        location: event.address || 'See Strava for details',
+        type: mapSkillToType(event.skill_levels),
+        status: 'upcoming' as const,
+        isSaved: false,
+        description: event.description,
+        organizer: `${event.organizing_athlete.firstname} ${event.organizing_athlete.lastname}`,
+        activityType: event.activity_type,
+        stravaEventId: event.id,
+        isFromStrava: true,
+      }];
+    }
+
+    return [];
   }
 
   return upcomingDates.map((dateStr, index) => ({
