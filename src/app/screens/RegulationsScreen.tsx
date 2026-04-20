@@ -92,7 +92,7 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
           <SearchField
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search the rules"
+            placeholder="Search rules"
           />
         </div>
       </div>
