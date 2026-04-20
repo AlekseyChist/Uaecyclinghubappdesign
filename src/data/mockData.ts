@@ -281,7 +281,7 @@ const RULES_IMG = '/DBB App \u00b7 Rules _ Pics';
 export const mockRegulations: RegulationCategory[] = [
   {
     id: 'basic-rules',
-    category: 'Basic Rules',
+    category: 'Riding Rules',
     items: [
       {
         id: 'basic-1',
