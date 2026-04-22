@@ -176,10 +176,10 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
           </div>
         )}
 
-        {/* Info Footer */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-4">
-          <p className="text-xs text-blue-900 leading-relaxed">
-            <strong>Note:</strong> &lsquo;The Law&rsquo; refers to the <a href={LAW_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Law On Road Traffic Safety</a> with amendments up to 2025. A new traffic law is being developed in Serbia at the time of publishing, and we have communicated our concerns regarding the &lsquo;Other Traffic Rules&rsquo; to the relevant authority. Always check the current law. When in doubt, prioritise safety.
+        {/* Disclaimer Footer */}
+        <div className="mt-8 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+          <p className="text-xs text-gray-600 leading-relaxed">
+            <strong>Disclaimer:</strong> We organise the weekly rides for free. This is done &ldquo;as is&rdquo;, so neither DBB nor any associated persons including the ride leaders and other riders shall bear any responsibility regarding event organisation.
           </p>
         </div>
       </div>
