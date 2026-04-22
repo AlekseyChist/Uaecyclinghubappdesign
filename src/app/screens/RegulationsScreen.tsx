@@ -151,9 +151,13 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
 
                         {isExpanded && (
                           <div className="px-4 pb-4 pt-1">
-                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                              {renderContentWithLawRefs(item.content)}
-                            </p>
+                            <div className="text-sm text-gray-600 leading-relaxed space-y-3">
+                              {item.content.split('\n\n').map((paragraph, i) => (
+                                <p key={i} className="whitespace-pre-line">
+                                  {renderContentWithLawRefs(paragraph)}
+                                </p>
+                              ))}
+                            </div>
                             {item.image && (
                               <img
                                 src={item.image}
