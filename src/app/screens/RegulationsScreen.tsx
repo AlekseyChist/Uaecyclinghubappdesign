@@ -5,29 +5,64 @@ import { ChevronDown, Bookmark, BookOpen, ExternalLink } from 'lucide-react';
 
 const LAW_URL = 'https://www.paragraf.rs/propisi/zakon_o_bezbednosti_saobracaja_na_putevima.html';
 
-function renderContentWithLawRefs(content: string) {
-  // Match law provisions like "Art. 187 p. 3 of the Law" or "No provision of the Law"
-  const lawRefPattern = /((?:Art\.\s*\d+\s*p\.\s*\d+\s*of\s*the\s*Law)|(?:No\s*provision\s*of\s*the\s*Law))/;
-  const parts = content.split(lawRefPattern);
+// Matches either a markdown-style link [label](url) OR a law reference
+// like "Art. 187 p. 3 of the Law" / "No provision of the Law".
+const CONTENT_PATTERN =
+  /(\[([^\]]+)\]\(([^)]+)\))|((?:Art\.\s*\d+\s*p\.\s*\d+\s*of\s*the\s*Law)|(?:No\s*provision\s*of\s*the\s*Law))/g;
 
-  return parts.map((part, index) => {
-    if (lawRefPattern.test(part)) {
-      return (
+function renderRuleContent(content: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  let match: RegExpExecArray | null;
+
+  // Fresh regex per call — /g stateful across calls
+  const re = new RegExp(CONTENT_PATTERN.source, 'g');
+
+  while ((match = re.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(content.slice(lastIndex, match.index));
+    }
+
+    if (match[1]) {
+      const label = match[2];
+      const url = match[3];
+      nodes.push(
         <a
-          key={index}
+          key={key++}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline underline-offset-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {label}
+        </a>
+      );
+    } else if (match[4]) {
+      nodes.push(
+        <a
+          key={key++}
           href={LAW_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-gray-400 italic inline-flex items-center gap-1 hover:text-gray-500 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
-          {part}
+          {match[4]}
           <ExternalLink className="w-3 h-3 inline-block" />
         </a>
       );
     }
-    return <span key={index}>{part}</span>;
-  });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    nodes.push(content.slice(lastIndex));
+  }
+
+  return nodes;
 }
 
 interface RegulationItem {
@@ -154,7 +189,7 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
                             <div className="text-sm text-gray-600 leading-relaxed space-y-3">
                               {item.content.split('\n\n').map((paragraph, i) => (
                                 <p key={i} className="whitespace-pre-line">
-                                  {renderContentWithLawRefs(paragraph)}
+                                  {renderRuleContent(paragraph)}
                                 </p>
                               ))}
                             </div>

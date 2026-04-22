@@ -317,7 +317,7 @@ export const mockRegulations: RegulationCategory[] = [
       {
         id: 'traffic-4',
         title: 'See the full traffic laws guide',
-        content: 'There is a comprehensive and constantly updated guide on the Serbian traffic laws by Bike Gremlin.',
+        content: 'There is a comprehensive and constantly updated guide on the Serbian traffic laws by [Bike Gremlin](https://www.paragraf.rs/propisi/zakon_o_bezbednosti_saobracaja_na_putevima.html).',
       },
     ],
   },
@@ -344,12 +344,12 @@ export const mockRegulations: RegulationCategory[] = [
       {
         id: 'etiq-4',
         title: 'Be self-sufficient',
-        content: 'You should have all you may need in case of a puncture or mechanical failure: a spare tube and/or tyre plugs, a minipump or other inflating device, a multitool. You\u2019re supposed to know how to fix a flat tyre without resorting to others\u2019 help (even though we always help each other).\nOn longer rides, it makes sense to carry some carbs and a couple of bottles of water or electrolytes. It\u2019s also a good idea to have a charged-up phone with an internet connection and some emergency cash.',
+        content: 'You should have all you may need in case of a puncture or mechanical failure: a spare tube and/or tyre plugs, a minipump or other inflating device, a multitool. You\u2019re supposed to know how to [fix a flat tyre](https://dropba.rs/blog/fix-flats) without resorting to others\u2019 help (even though we always help each other).\nOn longer rides, it makes sense to carry some carbs and a couple of bottles of water or electrolytes. It\u2019s also a good idea to have a charged-up phone with an internet connection and some emergency cash.',
       },
       {
         id: 'etiq-5',
         title: 'Take and share pictures',
-        content: 'We encourage you to take photos & videos during our rides, provided that doesn\u2019t endanger you or others (particularly when riding with one or no hands on the bars \u2014 and please no long selfie sticks in the group).\nPlease share your photos & videos in DBB chats on Telegram, WhatsApp & Viber.\nBy doing so, you grant us your irrevocable consent to use them in any imaginable way (but mostly on our Instagram).\nBy coming to our events and riding with the group, you agree to be filmed, and you grant us your irrevocable consent to use images of you in any imaginable way. Thanks!',
+        content: 'We encourage you to take photos & videos during our rides, provided that doesn\u2019t endanger you or others (particularly when riding with one or no hands on the bars \u2014 and please no long selfie sticks in the group).\nPlease share your photos & videos in DBB chats on [Telegram](https://t.me/dropbarbar#), [WhatsApp](https://chat.whatsapp.com/LDYZnmoj4LDCYmFjLSrxcS) & [Viber](https://invite.viber.com/?g2=AQAoXTR0yDzRGlDpONaoGvsn3j%2BKN4tjWYnu4QK%2FhI8rAvaBiwH1Jz3L%2FiLbxzTJ&lang=en).\nBy doing so, you grant us your irrevocable consent to use them in any imaginable way (but mostly on our [Instagram](https://www.instagram.com/dbb.club/)).\nBy coming to our events and riding with the group, you agree to be filmed, and you grant us your irrevocable consent to use images of you in any imaginable way. Thanks!',
       },
     ],
   },
@@ -395,7 +395,7 @@ export const mockRegulations: RegulationCategory[] = [
       {
         id: 'tip-7',
         title: 'Use the best tyres you can',
-        content: 'Of all your bike components, tyres are by far the most important for maintaining speed in the group. Apart from that, we all benefit if one doesn\u2019t puncture all the time or crash in a slippery turn.\n\nRecommended gravel tyres:\n\u2022 Hutchinson Caracal RACE (avoid the model without the word race)\n\u2022 Tufo Thundero or Speedero (both are equally good, no need for HD)\n\nRecommended road tyres:\n\u2022 Pirelli P Zero Race RS (RS is also a distinctive part of the name)\n\u2022 Continental Grand Prix 5000 S TR\n\nImportantly, inflate your tyres to the optimal pressure, not the one indicated on the sidewall or advised to you anecdotally. We suggest using tyre pressure calculators from Silca or Wolftooth.',
+        content: 'Of all your bike components, tyres are by far the most important for maintaining speed in the group. Apart from that, we all benefit if one doesn\u2019t puncture all the time or crash in a slippery turn.\n\nRecommended gravel tyres:\n\u2022 Hutchinson Caracal RACE (avoid the model without the word race)\n\u2022 Tufo Thundero or Speedero (both are equally good, no need for HD)\n\nRecommended road tyres:\n\u2022 Pirelli P Zero Race RS (RS is also a distinctive part of the name)\n\u2022 Continental Grand Prix 5000 S TR\n\nImportantly, inflate your tyres to the optimal pressure, not the one indicated on the sidewall or advised to you anecdotally. We suggest using tyre pressure calculators from [Silca](https://silca.cc/pages/sppc) or [Wolftooth](https://www.wolftoothcomponents.com/pages/tire-pressure-calculator).',
       },
     ],
   },
