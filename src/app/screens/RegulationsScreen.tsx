@@ -5,29 +5,64 @@ import { ChevronDown, Bookmark, BookOpen, ExternalLink } from 'lucide-react';
 
 const LAW_URL = 'https://www.paragraf.rs/propisi/zakon_o_bezbednosti_saobracaja_na_putevima.html';
 
-function renderContentWithLawRefs(content: string) {
-  // Match law provisions like "Art. 187 p. 3 of the Law" or "No provision of the Law"
-  const lawRefPattern = /((?:Art\.\s*\d+\s*p\.\s*\d+\s*of\s*the\s*Law)|(?:No\s*provision\s*of\s*the\s*Law))/;
-  const parts = content.split(lawRefPattern);
+// Matches either a markdown-style link [label](url) OR a law reference
+// like "Art. 187 p. 3 of the Law" / "No provision of the Law".
+const CONTENT_PATTERN =
+  /(\[([^\]]+)\]\(([^)]+)\))|((?:Art\.\s*\d+\s*p\.\s*\d+\s*of\s*the\s*Law)|(?:No\s*provision\s*of\s*the\s*Law))/g;
 
-  return parts.map((part, index) => {
-    if (lawRefPattern.test(part)) {
-      return (
+function renderRuleContent(content: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  let match: RegExpExecArray | null;
+
+  // Fresh regex per call — /g stateful across calls
+  const re = new RegExp(CONTENT_PATTERN.source, 'g');
+
+  while ((match = re.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(content.slice(lastIndex, match.index));
+    }
+
+    if (match[1]) {
+      const label = match[2];
+      const url = match[3];
+      nodes.push(
         <a
-          key={index}
+          key={key++}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline underline-offset-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {label}
+        </a>
+      );
+    } else if (match[4]) {
+      nodes.push(
+        <a
+          key={key++}
           href={LAW_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-gray-400 italic inline-flex items-center gap-1 hover:text-gray-500 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
-          {part}
+          {match[4]}
           <ExternalLink className="w-3 h-3 inline-block" />
         </a>
       );
     }
-    return <span key={index}>{part}</span>;
-  });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    nodes.push(content.slice(lastIndex));
+  }
+
+  return nodes;
 }
 
 interface RegulationItem {
@@ -92,7 +127,7 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
           <SearchField
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search the rules"
+            placeholder="Search rules"
           />
         </div>
       </div>
@@ -151,9 +186,13 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
 
                         {isExpanded && (
                           <div className="px-4 pb-4 pt-1">
-                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                              {renderContentWithLawRefs(item.content)}
-                            </p>
+                            <div className="text-sm text-gray-600 leading-relaxed space-y-3">
+                              {item.content.split('\n\n').map((paragraph, i) => (
+                                <p key={i} className="whitespace-pre-line">
+                                  {renderRuleContent(paragraph)}
+                                </p>
+                              ))}
+                            </div>
                             {item.image && (
                               <img
                                 src={item.image}
@@ -172,10 +211,10 @@ export function RegulationsScreen({ regulations }: RegulationsScreenProps) {
           </div>
         )}
 
-        {/* Info Footer */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-4">
-          <p className="text-xs text-blue-900 leading-relaxed">
-            <strong>Note:</strong> &lsquo;The Law&rsquo; refers to the <a href={LAW_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Law On Road Traffic Safety</a> with amendments up to 2025. A new traffic law is being developed in Serbia at the time of publishing, and we have communicated our concerns regarding the &lsquo;Other Traffic Rules&rsquo; to the relevant authority. Always check the current law. When in doubt, prioritise safety.
+        {/* Disclaimer Footer */}
+        <div className="mt-8 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+          <p className="text-xs text-gray-600 leading-relaxed">
+            <strong>Disclaimer:</strong> We organise the weekly rides for free. This is done &ldquo;as is&rdquo;, so neither DBB nor any associated persons including the ride leaders and other riders shall bear any responsibility regarding event organisation.
           </p>
         </div>
       </div>
