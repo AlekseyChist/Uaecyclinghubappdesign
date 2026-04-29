@@ -17,7 +17,7 @@ interface TracksScreenProps {
 export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sheetState, setSheetState] = useState<BottomSheetState>('collapsed');
-  const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
+  const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const searchBarRef = useRef<HTMLDivElement>(null);
   
@@ -52,8 +52,10 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
     return matchesSearch && matchesDifficulty && matchesSurface && matchesRideType && matchesRegion && matchesFavorites;
   });
 
-  const handlePinClick = (trackId: string) => {
-    setSelectedTrackId(trackId);
+  // MapView calls this for both marker clicks (single-track array) and polyline
+  // clicks (array of all overlapping tracks within the click hit-radius).
+  const handleTracksSelect = (ids: string[]) => {
+    setSelectedTrackIds(ids);
     setSheetState('half');
   };
 
@@ -62,7 +64,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const handleSheetStateChange = (next: BottomSheetState) => {
     setSheetState(next);
     if (next === 'collapsed') {
-      setSelectedTrackId(null);
+      setSelectedTrackIds([]);
     }
   };
 
@@ -70,13 +72,13 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
     onTrackClick(trackId);
   };
 
-  // If a track is selected and still passes current filters, the sheet shows only
-  // that track. If the selection got filtered out (e.g. user toggled a filter after
-  // selecting), fall back to the full filtered list so the UI stays consistent.
-  const selectedTrack = selectedTrackId
-    ? filteredTracks.find((t) => t.id === selectedTrackId) ?? null
-    : null;
-  const sheetTracks = selectedTrack ? [selectedTrack] : filteredTracks;
+  // Selection narrowed to tracks still passing current filters — if the user
+  // toggles a filter after selecting and the selection drops out, the UI falls
+  // back to the full filtered list instead of showing a stale empty state.
+  const selectedTracks = selectedTrackIds.length
+    ? filteredTracks.filter((t) => selectedTrackIds.includes(t.id))
+    : [];
+  const sheetTracks = selectedTracks.length ? selectedTracks : filteredTracks;
 
   const activeFiltersCount = [
     filters.difficulty,
@@ -208,8 +210,8 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
               coordinates: track.coordinates!,
               route: track.route?.map(p => [p.lat, p.lng] as [number, number]),
             }))}
-          selectedTrackId={selectedTrackId}
-          onTrackSelect={handlePinClick}
+          selectedTrackIds={selectedTrackIds}
+          onTracksSelect={handleTracksSelect}
           onTrackOpen={onTrackClick}
           showRoutes={true}
         />
@@ -228,9 +230,16 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
       {/* Bottom Sheet */}
       <BottomSheet state={sheetState} onStateChange={handleSheetStateChange} topAnchorRef={searchBarRef}>
         <div className="mb-3">
-          {selectedTrack ? (
+          {selectedTracks.length === 1 ? (
             <>
-              <h3 className="font-medium mb-1 truncate">{selectedTrack.name}</h3>
+              <h3 className="font-medium mb-1 truncate">{selectedTracks[0].name}</h3>
+              <p className="text-sm text-gray-500">Drag down to see all tracks</p>
+            </>
+          ) : selectedTracks.length > 1 ? (
+            <>
+              <h3 className="font-medium mb-1">
+                {selectedTracks.length} tracks at this point
+              </h3>
               <p className="text-sm text-gray-500">Drag down to see all tracks</p>
             </>
           ) : (

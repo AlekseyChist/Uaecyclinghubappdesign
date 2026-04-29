@@ -14,8 +14,8 @@ export interface MapTrack {
 
 interface MapViewProps {
   tracks: MapTrack[];
-  selectedTrackId?: string | null;
-  onTrackSelect?: (trackId: string) => void;
+  selectedTrackIds?: string[];
+  onTracksSelect?: (trackIds: string[]) => void;
   onTrackOpen?: (trackId: string) => void;
   center?: [number, number];
   zoom?: number;
@@ -140,42 +140,134 @@ function groupTracksByStartPoint(tracks: MapTrack[]): MarkerGroup[] {
   return groups;
 }
 
+// Pixel-space distance from click point to a polyline. Used to find ALL routes
+// near the click, not just the one Leaflet flagged as topmost.
+const NEARBY_POLYLINE_THRESHOLD_PX = 12;
+
+function pointToSegmentDistance(p: L.Point, a: L.Point, b: L.Point): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+function polylineMinDistance(route: [number, number][], clickPoint: L.Point, map: L.Map): number {
+  if (route.length < 2) return Infinity;
+  let min = Infinity;
+  for (let i = 0; i < route.length - 1; i++) {
+    const a = map.latLngToContainerPoint(route[i]);
+    const b = map.latLngToContainerPoint(route[i + 1]);
+    const d = pointToSegmentDistance(clickPoint, a, b);
+    if (d < min) min = d;
+  }
+  return min;
+}
+
+function collectNearbyTrackIds(
+  tracks: MapTrack[],
+  clickPoint: L.Point,
+  map: L.Map,
+  thresholdPx: number,
+): string[] {
+  const hits: string[] = [];
+  for (const track of tracks) {
+    if (!track.route || track.route.length < 2) continue;
+    if (polylineMinDistance(track.route, clickPoint, map) <= thresholdPx) {
+      hits.push(track.id);
+    }
+  }
+  return hits;
+}
+
 // Component to handle map interactions
 function MapController({
-  selectedTrackId,
+  selectedTrackIds,
   tracks,
   showRoutes
 }: {
-  selectedTrackId?: string | null;
+  selectedTrackIds: string[];
   tracks: MapTrack[];
   showRoutes?: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (selectedTrackId) {
-      const track = tracks.find(t => t.id === selectedTrackId);
-      if (track) {
-        // If track has a route, fit bounds to the route
-        if (showRoutes && track.route && track.route.length > 0) {
-          const bounds = L.latLngBounds(track.route.map(p => [p[0], p[1]] as [number, number]));
-          map.fitBounds(bounds, { padding: [50, 50], duration: 0.5 });
-        } else {
-          map.flyTo([track.coordinates.lat, track.coordinates.lng], 12, {
-            duration: 0.5,
-          });
-        }
-      }
+    // Only auto-fit on single-track selection. Multi-track means overlapping
+    // routes that already share the visible viewport, so re-zooming would jump
+    // to one of them and lose the others.
+    if (selectedTrackIds.length !== 1) return;
+    const track = tracks.find(t => t.id === selectedTrackIds[0]);
+    if (!track) return;
+
+    if (showRoutes && track.route && track.route.length > 0) {
+      const bounds = L.latLngBounds(track.route.map(p => [p[0], p[1]] as [number, number]));
+      map.fitBounds(bounds, { padding: [50, 50], duration: 0.5 });
+    } else {
+      map.flyTo([track.coordinates.lat, track.coordinates.lng], 12, {
+        duration: 0.5,
+      });
     }
-  }, [selectedTrackId, tracks, map, showRoutes]);
+  }, [selectedTrackIds, tracks, map, showRoutes]);
 
   return null;
 }
 
+// Polylines extracted into their own component so the click handler can call
+// useMap() and convert lat/lng routes to container-pixel space for proximity
+// detection across all overlapping routes.
+function RouteLines({
+  tracks,
+  selectedTrackIds,
+  onTracksSelect,
+}: {
+  tracks: MapTrack[];
+  selectedTrackIds: string[];
+  onTracksSelect?: (trackIds: string[]) => void;
+}) {
+  const map = useMap();
+
+  return (
+    <>
+      {tracks.map((track) => {
+        if (!track.route || track.route.length === 0) return null;
+        const isSelected = selectedTrackIds.includes(track.id);
+        return (
+          <Polyline
+            key={`route-${track.id}`}
+            positions={track.route}
+            pathOptions={{
+              color: difficultyColors[track.difficulty],
+              weight: isSelected ? 5 : 3,
+              opacity: isSelected ? 1 : 0.7,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+            eventHandlers={{
+              click: (e) => {
+                const hits = new Set(
+                  collectNearbyTrackIds(tracks, e.containerPoint, map, NEARBY_POLYLINE_THRESHOLD_PX)
+                );
+                // Always include the polyline Leaflet itself flagged as hit, in
+                // case it sits just outside the threshold (e.g. tap registered
+                // on its hit-box but not within 12px of its rendered line).
+                hits.add(track.id);
+                onTracksSelect?.(Array.from(hits));
+              },
+            }}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 export function MapView({
   tracks,
-  selectedTrackId,
-  onTrackSelect,
+  selectedTrackIds = [],
+  onTracksSelect,
   onTrackOpen,
   center = [44.0165, 21.0059], // Serbia center (near Kragujevac)
   zoom = 7,
@@ -196,34 +288,23 @@ export function MapView({
       />
 
       <MapController
-        selectedTrackId={selectedTrackId}
+        selectedTrackIds={selectedTrackIds}
         tracks={tracks}
         showRoutes={showRoutes}
       />
 
-      {/* Render route polylines */}
-      {showRoutes && tracks.map((track) => (
-        track.route && track.route.length > 0 && (
-          <Polyline
-            key={`route-${track.id}`}
-            positions={track.route}
-            pathOptions={{
-              color: difficultyColors[track.difficulty],
-              weight: selectedTrackId === track.id ? 5 : 3,
-              opacity: selectedTrackId === track.id ? 1 : 0.7,
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-            eventHandlers={{
-              click: () => onTrackSelect?.(track.id),
-            }}
-          />
-        )
-      ))}
+      {/* Render route polylines (extracted so click handler can read map pixel coords) */}
+      {showRoutes && (
+        <RouteLines
+          tracks={tracks}
+          selectedTrackIds={selectedTrackIds}
+          onTracksSelect={onTracksSelect}
+        />
+      )}
 
       {/* Render grouped markers with count badges */}
       {markerGroups.map((group, groupIdx) => {
-        const isGroupSelected = group.tracks.some(t => t.id === selectedTrackId);
+        const isGroupSelected = group.tracks.some(t => selectedTrackIds.includes(t.id));
         const count = group.tracks.length;
 
         return (
@@ -233,13 +314,17 @@ export function MapView({
             icon={createMarkerIcon(group.primaryDifficulty, isGroupSelected, count)}
             eventHandlers={{
               click: () => {
-                // Select first track in group, or cycle through if already selected
+                // Marker click selects exactly one track at a time:
+                // - single-track group: that track
+                // - multi-track group: cycle through one-by-one to keep parity with
+                //   prior behavior (popup already shows the full list)
                 if (count === 1) {
-                  onTrackSelect?.(group.tracks[0].id);
+                  onTracksSelect?.([group.tracks[0].id]);
                 } else {
-                  const currentIdx = group.tracks.findIndex(t => t.id === selectedTrackId);
+                  const currentSingleId = selectedTrackIds.length === 1 ? selectedTrackIds[0] : null;
+                  const currentIdx = group.tracks.findIndex(t => t.id === currentSingleId);
                   const nextIdx = (currentIdx + 1) % count;
-                  onTrackSelect?.(group.tracks[nextIdx].id);
+                  onTracksSelect?.([group.tracks[nextIdx].id]);
                 }
               },
             }}
@@ -268,7 +353,7 @@ export function MapView({
                           key={track.id}
                           className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            onTrackSelect?.(track.id);
+                            onTracksSelect?.([track.id]);
                           }}
                         >
                           <div
