@@ -15,8 +15,13 @@ const BOTTOM_NAV_HEIGHT = 60;
 // Search bar is ~80px; full state must not go under it
 const SEARCH_BAR_HEIGHT = 80;
 
+// Collapsed peek height adapts to viewport: tall enough on small phones to show
+// handle + summary + first card, but capped on tall screens (tablets/desktop).
+const COLLAPSED_HEIGHT = 'clamp(180px, 22vh, 240px)';
+const COLLAPSED_MIN_PX = 180;
+
 const stateHeights: Record<BottomSheetState, string> = {
-  collapsed: '120px',
+  collapsed: COLLAPSED_HEIGHT,
   half: '50vh',
   full: `calc(100vh - ${BOTTOM_NAV_HEIGHT + SEARCH_BAR_HEIGHT}px)`,
 };
@@ -25,7 +30,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
   const [currentState, setCurrentState] = useState<BottomSheetState>(state);
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
-  const [currentHeight, setCurrentHeight] = useState(120);
+  const [currentHeight, setCurrentHeight] = useState(COLLAPSED_MIN_PX);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
     const deltaY = startY - clientY;
     const newHeight = currentHeight + deltaY;
 
-    if (newHeight >= 120 && newHeight <= window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT) {
+    if (newHeight >= COLLAPSED_MIN_PX && newHeight <= window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT) {
       setCurrentHeight(newHeight);
     }
   };
@@ -57,7 +62,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
     
     if (currentHeight < 200) {
       newState = 'collapsed';
-      setCurrentHeight(120);
+      setCurrentHeight(COLLAPSED_MIN_PX);
     } else if (currentHeight < window.innerHeight * 0.7) {
       newState = 'half';
       setCurrentHeight(window.innerHeight * 0.5);
@@ -102,7 +107,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
       >
         <GripHorizontal className="w-8 h-1.5 text-gray-300" />
       </div>
-      <div className="h-[calc(100%-48px)] overflow-y-auto px-4 pb-4">
+      <div className="h-[calc(100%-36px)] overflow-y-auto px-4 pb-4">
         {children}
       </div>
     </div>
