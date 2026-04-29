@@ -15,6 +15,23 @@ interface EventsScreenProps {
 
 type SourceFilter = 'all' | 'club' | 'community';
 
+// Combine event.date ("YYYY-MM-DD") and event.time ("HH:MM AM/PM") into a Date
+// in the browser's local timezone. Used to filter out events that have already started.
+function getEventDateTime(event: Event): Date {
+  const [year, month, day] = event.date.split('-').map(Number);
+  const match = event.time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) {
+    // Unknown format — keep the event visible until midnight by using end-of-day
+    return new Date(year, month - 1, day, 23, 59);
+  }
+  let hour = parseInt(match[1], 10);
+  const minute = parseInt(match[2], 10);
+  const isPM = match[3].toUpperCase() === 'PM';
+  if (isPM && hour < 12) hour += 12;
+  if (!isPM && hour === 12) hour = 0;
+  return new Date(year, month - 1, day, hour, minute);
+}
+
 export function EventsScreen({
   events,
   clubEvents,
@@ -28,7 +45,6 @@ export function EventsScreen({
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
 
@@ -48,11 +64,10 @@ export function EventsScreen({
         event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.location.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Compare date strings to avoid timezone issues
       const eventDate = new Date(event.date);
       const matchesFilter =
         filterType === 'all' ||
-        (filterType === 'upcoming' && event.date >= todayStr) ||
+        (filterType === 'upcoming' && getEventDateTime(event) >= now) ||
         (filterType === 'this-month' &&
           eventDate.getMonth() === thisMonth &&
           eventDate.getFullYear() === thisYear);
