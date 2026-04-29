@@ -7,35 +7,54 @@ interface BottomSheetProps {
   children: React.ReactNode;
   state?: BottomSheetState;
   onStateChange?: (state: BottomSheetState) => void;
+  // Optional ref to an element above the sheet (e.g. search bar). When provided,
+  // the sheet's `full` state and drag bounds adapt to that element's actual height
+  // via ResizeObserver — so expanding filters never hides the drag handle.
+  topAnchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 // Bottom nav is ~60px tall; sheet sits above it
 const BOTTOM_NAV_HEIGHT = 60;
 
-// Search bar is ~80px; full state must not go under it
-const SEARCH_BAR_HEIGHT = 80;
+// Fallback used when no topAnchorRef is provided (or it has not attached yet).
+const DEFAULT_TOP_BOUNDARY = 80;
 
 // Collapsed peek height adapts to viewport: tall enough on small phones to show
 // handle + summary + first card, but capped on tall screens (tablets/desktop).
 const COLLAPSED_HEIGHT = 'clamp(180px, 22vh, 240px)';
 const COLLAPSED_MIN_PX = 180;
 
-const stateHeights: Record<BottomSheetState, string> = {
-  collapsed: COLLAPSED_HEIGHT,
-  half: '50vh',
-  full: `calc(100vh - ${BOTTOM_NAV_HEIGHT + SEARCH_BAR_HEIGHT}px)`,
-};
-
-export function BottomSheet({ children, state = 'collapsed', onStateChange }: BottomSheetProps) {
+export function BottomSheet({ children, state = 'collapsed', onStateChange, topAnchorRef }: BottomSheetProps) {
   const [currentState, setCurrentState] = useState<BottomSheetState>(state);
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const [currentHeight, setCurrentHeight] = useState(COLLAPSED_MIN_PX);
+  const [topBoundary, setTopBoundary] = useState(DEFAULT_TOP_BOUNDARY);
   const sheetRef = useRef<HTMLDivElement>(null);
+
+  const stateHeights: Record<BottomSheetState, string> = {
+    collapsed: COLLAPSED_HEIGHT,
+    half: '50vh',
+    full: `calc(100vh - ${BOTTOM_NAV_HEIGHT + topBoundary}px)`,
+  };
 
   useEffect(() => {
     setCurrentState(state);
   }, [state]);
+
+  // Track the top anchor element's height (e.g. search bar with collapsible filters).
+  // ResizeObserver fires whenever its layout changes, keeping `topBoundary` accurate.
+  useEffect(() => {
+    const el = topAnchorRef?.current;
+    if (!el) return;
+
+    const update = () => setTopBoundary(el.getBoundingClientRect().height);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [topAnchorRef]);
 
   const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
     setIsDragging(true);
@@ -50,7 +69,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
     const deltaY = startY - clientY;
     const newHeight = currentHeight + deltaY;
 
-    if (newHeight >= COLLAPSED_MIN_PX && newHeight <= window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT) {
+    if (newHeight >= COLLAPSED_MIN_PX && newHeight <= window.innerHeight - BOTTOM_NAV_HEIGHT - topBoundary) {
       setCurrentHeight(newHeight);
     }
   };
@@ -68,7 +87,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
       setCurrentHeight(window.innerHeight * 0.5);
     } else {
       newState = 'full';
-      setCurrentHeight(window.innerHeight - BOTTOM_NAV_HEIGHT - SEARCH_BAR_HEIGHT);
+      setCurrentHeight(window.innerHeight - BOTTOM_NAV_HEIGHT - topBoundary);
     }
 
     setCurrentState(newState);
@@ -89,7 +108,7 @@ export function BottomSheet({ children, state = 'collapsed', onStateChange }: Bo
         window.removeEventListener('touchend', handleDragEnd);
       };
     }
-  }, [isDragging, startY, currentHeight]);
+  }, [isDragging, startY, currentHeight, topBoundary]);
 
   return (
     <div

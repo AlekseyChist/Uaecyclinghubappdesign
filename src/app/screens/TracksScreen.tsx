@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { BottomSheet, BottomSheetState } from '@/app/components/design-system/BottomSheet';
@@ -19,6 +19,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const [sheetState, setSheetState] = useState<BottomSheetState>('collapsed');
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const searchBarRef = useRef<HTMLDivElement>(null);
   
   type RideType = 'coffee' | 'dark' | 'sun' | 'plus' | 'misc';
 
@@ -71,7 +72,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   return (
     <div className="h-full bg-white relative overflow-hidden">
       {/* Search and Filter Bar - must be above map */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 search-bar-container">
+      <div ref={searchBarRef} className="absolute top-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 search-bar-container">
           <div className="flex gap-2">
             <SearchField
               value={searchQuery}
@@ -208,7 +209,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
       </div>
 
       {/* Bottom Sheet */}
-      <BottomSheet state={sheetState} onStateChange={setSheetState}>
+      <BottomSheet state={sheetState} onStateChange={setSheetState} topAnchorRef={searchBarRef}>
         <div className="mb-3">
           <h3 className="font-medium mb-1">
             {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''} found
