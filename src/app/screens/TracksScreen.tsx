@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { SearchField } from '@/app/components/design-system/SearchField';
 import { BottomSheet, BottomSheetState } from '@/app/components/design-system/BottomSheet';
@@ -19,6 +19,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   const [sheetState, setSheetState] = useState<BottomSheetState>('collapsed');
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const searchBarRef = useRef<HTMLDivElement>(null);
   
   type RideType = 'coffee' | 'dark' | 'sun' | 'plus' | 'misc';
 
@@ -56,9 +57,26 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
     setSheetState('half');
   };
 
+  // Dragging the sheet down to collapsed is the way back to the full list —
+  // matches "no Show all button" UX while still letting the user dismiss the selection.
+  const handleSheetStateChange = (next: BottomSheetState) => {
+    setSheetState(next);
+    if (next === 'collapsed') {
+      setSelectedTrackId(null);
+    }
+  };
+
   const handleTrackCardClick = (trackId: string) => {
     onTrackClick(trackId);
   };
+
+  // If a track is selected and still passes current filters, the sheet shows only
+  // that track. If the selection got filtered out (e.g. user toggled a filter after
+  // selecting), fall back to the full filtered list so the UI stays consistent.
+  const selectedTrack = selectedTrackId
+    ? filteredTracks.find((t) => t.id === selectedTrackId) ?? null
+    : null;
+  const sheetTracks = selectedTrack ? [selectedTrack] : filteredTracks;
 
   const activeFiltersCount = [
     filters.difficulty,
@@ -71,7 +89,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
   return (
     <div className="h-full bg-white relative overflow-hidden">
       {/* Search and Filter Bar - must be above map */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 search-bar-container">
+      <div ref={searchBarRef} className="absolute top-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 search-bar-container">
           <div className="flex gap-2">
             <SearchField
               value={searchQuery}
@@ -208,15 +226,24 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
       </div>
 
       {/* Bottom Sheet */}
-      <BottomSheet state={sheetState} onStateChange={setSheetState}>
+      <BottomSheet state={sheetState} onStateChange={handleSheetStateChange} topAnchorRef={searchBarRef}>
         <div className="mb-3">
-          <h3 className="font-medium mb-1">
-            {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''} found
-          </h3>
-          <p className="text-sm text-gray-500">Select a track to preview</p>
+          {selectedTrack ? (
+            <>
+              <h3 className="font-medium mb-1 truncate">{selectedTrack.name}</h3>
+              <p className="text-sm text-gray-500">Drag down to see all tracks</p>
+            </>
+          ) : (
+            <>
+              <h3 className="font-medium mb-1">
+                {filteredTracks.length} track{filteredTracks.length !== 1 ? 's' : ''} found
+              </h3>
+              <p className="text-sm text-gray-500">Select a track to preview</p>
+            </>
+          )}
         </div>
 
-        {filteredTracks.length === 0 ? (
+        {sheetTracks.length === 0 ? (
           <EmptyState
             icon={MapIcon}
             title="No tracks found"
@@ -224,7 +251,7 @@ export function TracksScreen({ tracks, onTrackClick, onFavoriteToggle }: TracksS
           />
         ) : (
           <div className="space-y-3">
-            {filteredTracks.map((track) => (
+            {sheetTracks.map((track) => (
               <TrackCard
                 key={track.id}
                 track={track}
