@@ -57,17 +57,18 @@ export function ShopCard({ shop }: ShopCardProps) {
             {shop.description}
           </p>
 
-          <div className="flex items-center gap-1 text-xs text-gray-400">
+          <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs text-gray-400">
             {shop.location && (
-              <span>{shop.location}</span>
+              <span className="whitespace-nowrap">{shop.location} ·</span>
             )}
-            {shop.location && <span>·</span>}
-            {isPhone ? (
-              <Phone className="w-3 h-3 inline-block" />
-            ) : (
-              <ExternalLink className="w-3 h-3 inline-block" />
-            )}
-            <span>{shop.linkLabel}</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              {isPhone ? (
+                <Phone className="w-3 h-3" />
+              ) : (
+                <ExternalLink className="w-3 h-3" />
+              )}
+              {shop.linkLabel}
+            </span>
           </div>
         </div>
       </div>
